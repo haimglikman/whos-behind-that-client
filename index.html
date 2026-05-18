@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who's Behind That?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a6bff;--blue-dim:#eff6ff;--blue-mid:#d0e4f7;
+  --navy:#0f2744;
+  --bg:#e8f2fc;--bg2:#f5f9ff;--surface:#fff;
+  --border:#cfe0f5;--border2:#b8d0ec;
+  --text:#1e293b;--text2:#475569;--text3:#94a3b8;
+  --green:#22c55e;--amber:#f59e0b;--red:#ef4444;--red-dim:#fee2e2;
+  --gold:#c08010;--gold-bg:#fffcf0;--gold-border:#f0c040;
+  --mono:'DM Mono',monospace;
+  --sans:'Nunito','system-ui',sans-serif;
+  --radius:14px;--radius-sm:10px;--radius-xs:6px;
+}
+html,body{height:100%;font-family:var(--sans)}
+body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--blue),#0a3fa8);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.brand-name{font-size:14px;font-weight:700;color:#fff}
+.brand-badge{font-size:9px;color:#4a8aff;background:rgba(74,138,255,.15);border:1px solid rgba(74,138,255,.25);border-radius:99px;padding:2px 9px;font-weight:700;letter-spacing:.04em}
+.topbar-right{font-size:11px;color:#4a6a9a;font-weight:600}
+
+/* ── NAV ── */
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;flex-shrink:0}
+.nav-item{font-size:13px;color:var(--text3);padding:13px 18px;cursor:pointer;border-bottom:2px solid transparent;font-weight:600;transition:color .15s}
+.nav-item:hover{color:var(--text2)}
+.nav-item.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;min-height:0}
+.page{display:none;flex:1;overflow:auto}
+.page.active{display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;flex-shrink:0}
+.sb-section{padding:0 16px 18px}
+.sb-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px}
+.sb-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;color:var(--text2);font-weight:500}
+.sb-val{font-size:12px;font-weight:700;color:var(--blue)}
+.sb-divider{height:1px;background:var(--bg);margin:2px 0 16px}
+.rate-section{padding:0 16px;margin-top:auto}
+.rate-track{height:6px;background:var(--blue-mid);border-radius:99px;overflow:hidden;margin-bottom:5px}
+.rate-fill{height:100%;background:linear-gradient(90deg,var(--blue),#5a9fef);border-radius:99px;transition:width .3s}
+.rate-text{font-size:11px;color:var(--text3);display:flex;justify-content:space-between;font-weight:600}
+.sb-links{padding:0 16px;margin-top:16px;display:flex;flex-direction:column;gap:7px}
+.sb-link{font-size:12px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:7px;font-weight:600;transition:color .15s}
+.sb-link:hover{color:var(--blue)}
+.sb-link svg{flex-shrink:0}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;padding:22px 26px;display:flex;flex-direction:column;gap:14px;overflow:auto}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.card-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:11px}
+
+/* ── URL INPUT ── */
+.url-row{display:flex;gap:8px}
+.url-input{flex:1;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 14px;font-size:13px;color:var(--text);outline:none;font-family:var(--sans);font-weight:500;background:var(--bg2);transition:border-color .15s}
+.url-input:focus{border-color:var(--blue)}
+.url-input::placeholder{color:var(--blue-mid)}
+.btn-primary{background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);white-space:nowrap;transition:opacity .15s}
+.btn-primary:hover{opacity:.88}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm{font-size:11px;padding:6px 14px;border-radius:8px}
+
+/* ── ACTOR HANDLE ROW ── */
+.actor-handle-row{margin-top:10px;display:none}
+.actor-handle-hint{font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:500}
+
+/* ── ERROR BANNER ── */
+.error-banner{display:none;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--red);line-height:1.5;user-select:text;cursor:text;position:relative;margin-bottom:4px}
+.error-dismiss{position:absolute;right:10px;top:8px;font-size:16px;cursor:pointer;color:var(--text3);line-height:1;font-weight:500}
+
+/* ── MANUAL FALLBACK ── */
+.manual-fallback{display:none;margin-top:10px}
+.fallback-hint{font-size:11px;color:var(--amber);margin-bottom:6px;font-weight:600}
+.post-textarea{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;color:var(--text);font-size:12px;font-family:var(--sans);resize:vertical;outline:none;min-height:80px;line-height:1.55;font-weight:500}
+.post-textarea:focus{border-color:var(--blue)}
+
+/* ── LOADER ── */
+.loader{display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:40px 20px}
+.loader.active{display:flex}
+.loader-spinner{width:36px;height:36px;border:3px solid var(--blue-mid);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-steps{display:flex;flex-direction:column;gap:6px;width:100%;max-width:280px}
+.loader-step{font-size:12px;color:var(--text3);font-weight:500;padding:4px 0;transition:color .2s}
+.loader-step.active{color:var(--blue);font-weight:700}
+.loader-step.done{color:var(--green)}
+
+/* ── RESULTS ── */
+.results{display:none;flex-direction:column;gap:14px}
+.results.active{display:flex}
+.result-url{font-size:11px;color:var(--text3);font-family:var(--mono);font-weight:500;word-break:break-all;margin-bottom:2px}
+
+.dial-row{display:flex;align-items:center;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bg)}
+.dial{position:relative;width:60px;height:60px;flex-shrink:0}
+.dial-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--blue)}
+.overall-label{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.overall-desc{font-size:11px;color:var(--text3);line-height:1.55;font-weight:500}
+
+.ai-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.ai-label{font-size:11px;color:var(--text3);font-weight:600;width:90px;flex-shrink:0}
+.bar-wrap{flex:1;height:5px;background:var(--blue-mid);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;transition:width .4s}
+.ai-val{font-size:11px;font-weight:700;width:32px;text-align:right}
+.ai-note{font-size:11px;color:var(--text3);font-weight:500;margin-top:3px}
+
+/* ── MATCH ITEMS ── */
+.section-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.match-item{border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:7px}
+.match-item.primary{border-left-width:3px;border-left-color:var(--blue)}
+.match-item.secondary{border-left-width:3px;border-left-color:var(--blue-mid);opacity:.85}
+.match-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.match-name{font-size:12px;font-weight:700;color:var(--text);flex:1}
+.match-tag{font-size:9px;color:var(--blue);background:var(--blue-dim);border-radius:99px;padding:2px 9px;font-weight:700}
+.match-tag.sec{color:var(--text3);background:var(--bg2)}
+.match-pct{font-size:13px;font-weight:700;color:var(--blue)}
+.match-pct.sec{color:var(--text3)}
+.mini-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.mini-label{font-size:10px;color:var(--text3);width:140px;font-weight:500}
+.mini-wrap{flex:1;height:3px;background:var(--blue-mid);border-radius:99px;overflow:hidden}
+.mini-fill{height:100%;border-radius:99px}
+.mini-val{font-size:10px;color:var(--text3);width:28px;text-align:right;font-weight:600}
+.match-why{font-size:11px;color:var(--text2);line-height:1.55;margin-bottom:6px;font-weight:500}
+.missing-box{background:var(--bg2);border-radius:var(--radius-xs);padding:8px 10px;border-left:2px solid var(--blue-mid)}
+.missing-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.missing-text{font-size:11px;color:var(--text2);line-height:1.55;font-weight:500}
+.no-alignment{font-size:12px;color:var(--text3);padding:8px 0;font-weight:500}
+
+/* ── CONVERGENT ── */
+.convergent-box{background:var(--gold-bg);border:1.5px dashed var(--gold-border);border-radius:var(--radius-sm);padding:11px 13px;margin-top:10px}
+.conv-header{font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.conv-entities{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:8px}
+.conv-rivals{font-size:9px;background:var(--red-dim);color:var(--red);border-radius:99px;padding:2px 8px;font-weight:700}
+.conv-outcome{font-size:11px;color:var(--text2);font-weight:600;margin-bottom:4px}
+.conv-explanation{font-size:11px;color:var(--text3);line-height:1.55;font-weight:500}
+
+/* ── ACCOUNT SECTION ── */
+.actor-prompt{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;display:none}
+.actor-prompt-text{font-size:12px;color:var(--text2);margin-bottom:10px;font-weight:500}
+.actor-prompt-btns{display:flex;gap:8px}
+.actor-result-card{display:none}
+.actor-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.actor-location{font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:500}
+.actor-bio{font-size:11px;color:var(--text2);line-height:1.6;font-weight:500}
+.actor-handles{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.actor-handle-tag{font-size:10px;color:var(--blue);background:var(--blue-dim);border-radius:99px;padding:2px 9px;font-weight:700}
+
+/* ── HISTORY PAGE ── */
+.history-main{flex:1;padding:22px 26px;display:flex;flex-direction:column;gap:14px;overflow:auto}
+.page-header{margin-bottom:4px}
+.page-header h1{font-size:20px;font-weight:700;color:var(--text);margin-bottom:3px}
+.page-header p{font-size:12px;color:var(--text3);font-weight:500}
+.history-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px}
+.history-url{font-size:12px;color:var(--text2);word-break:break-all;font-weight:600}
+.history-score{font-size:13px;font-weight:700}
+.history-time{font-size:11px;color:var(--text3);margin-top:3px;font-weight:500}
+.history-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.history-tag{font-size:10px;color:var(--text3);background:var(--bg2);border:1px solid var(--border);border-radius:99px;padding:2px 9px;font-weight:600}
+.scan-id{font-family:var(--mono);font-size:9px;color:var(--text3);background:var(--bg2);padding:2px 7px;border-radius:99px;border:1px solid var(--border)}
+.scan-version{font-size:9px;color:var(--text3);font-family:var(--mono)}
+.no-history{font-size:13px;color:var(--text3);padding:40px;text-align:center;font-weight:500}
+.comment-field{width:100%;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius-xs);padding:7px 10px;color:var(--text);font-size:11px;font-family:var(--sans);resize:none;outline:none;min-height:36px;margin-top:9px;transition:border-color .15s;font-weight:500}
+.comment-field:focus{border-color:var(--blue)}
+.comment-field::placeholder{color:var(--text3)}
+
+/* ── ABOUT PAGE ── */
+.about-main{flex:1;padding:22px 26px;overflow:auto;max-width:680px}
+.about-section{margin-bottom:28px}
+.about-section h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px}
+.about-section p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px;font-weight:500}
+.about-section a{color:var(--blue);font-weight:600}
+.disclaimer-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;font-size:12px;color:var(--text2);line-height:1.7;font-weight:500}
+.disclaimer-box strong{color:var(--text);font-weight:700}
+
+/* ── RATE LIMIT BANNER ── */
+.rate-limit-banner{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);padding:14px 16px;text-align:center}
+.rate-limit-banner h3{font-size:14px;font-weight:700;color:var(--red);margin-bottom:6px}
+.rate-limit-banner p{font-size:12px;color:var(--text2);line-height:1.6;font-weight:500}
+.rate-limit-banner a{color:var(--blue);font-weight:700}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--text);border-radius:10px;padding:10px 16px;font-size:12px;color:#fff;z-index:1000;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;font-weight:600}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── BOTTOM BAR ── */
+.bottombar{background:var(--surface);border-top:1px solid var(--border);padding:8px 28px;display:flex;align-items:center;gap:16px;font-size:10px;color:var(--text3);font-weight:600;flex-shrink:0}
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px;background:var(--green)}
+.status-dot.warn{background:var(--amber)}
+.status-dot.offline{background:var(--red)}
+.bar-divider{width:1px;height:12px;background:var(--border)}
+.bar-right{margin-left:auto;font-size:10px;color:var(--border2)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="5.5" stroke="white" stroke-width="1.6"/><path d="M7.5 4.5v3l2.2 1.2" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </div>
+    <div class="brand-name">Who's Behind That?</div>
+    <div class="brand-badge">Client</div>
+  </div>
+  <div class="topbar-right">Powered by Claude AI</div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-item active" id="nav-analyze" onclick="showPage('analyze',this)">Analyze</div>
+  <div class="nav-item" id="nav-history" onclick="showPage('history',this)">My history</div>
+  <div class="nav-item" id="nav-about" onclick="showPage('about',this)">About</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- ── ANALYZE PAGE ── -->
+  <div class="page active" id="page-analyze">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sb-section">
+        <div class="sb-label">My activity</div>
+        <div class="sb-stat"><span>Scans today</span><span class="sb-val" id="scans-today">0</span></div>
+        <div class="sb-stat"><span>Remaining today</span><span class="sb-val" id="scans-remaining">10</span></div>
+        <div class="sb-stat"><span>Total scans</span><span class="sb-val" id="scans-total">0</span></div>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="rate-section">
+        <div class="sb-label">Daily limit</div>
+        <div class="rate-track"><div class="rate-fill" id="rate-fill" style="width:0%"></div></div>
+        <div class="rate-text"><span id="rate-text-left">0 of 10 used</span><span>resets midnight</span></div>
+      </div>
+      <div class="sb-divider" style="margin-top:16px"></div>
+      <div class="sb-links">
+        <div class="sb-link" onclick="showPage('about',document.getElementById('nav-about'))">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#94a3b8" stroke-width="1.2"/><path d="M6.5 5.5v4M6.5 4.5v-.5" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Privacy policy
+        </div>
+        <div class="sb-link" onclick="showPage('about',document.getElementById('nav-about'))">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3.5" width="10" height="7" rx="1" stroke="#94a3b8" stroke-width="1.2" fill="none"/><path d="M1.5 5.5l5 3 5-3" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Contact us
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- URL card -->
+      <div class="card">
+        <div class="card-label">Post URL</div>
+        <div id="error-banner" class="error-banner">
+          <span class="error-dismiss" onclick="hideError()">×</span>
+          <span id="error-text"></span>
+        </div>
+        <div class="url-row">
+          <input type="text" class="url-input" id="url-input" placeholder="https://x.com/username/status/..." oninput="onUrlChange()" />
+          <button class="btn-primary" id="analyze-btn" onclick="startAnalysis()">Analyze</button>
+        </div>
+        <div class="actor-handle-row" id="actor-handle-row">
+          <div class="actor-handle-hint">Instagram/Facebook detected — enter the poster's handle for actor research (optional):</div>
+          <input type="text" class="url-input" id="manual-actor-handle" placeholder="@username" style="font-size:12px" />
+        </div>
+        <div class="manual-fallback" id="manual-fallback">
+          <div class="fallback-hint" id="fallback-hint">⚠ Could not fetch post automatically. Paste the text below:</div>
+          <textarea class="post-textarea" id="post-text" placeholder="Paste the post text here..."></textarea>
+          <button class="btn-primary btn-sm" id="manual-analyze-btn" onclick="analyzeWithManualText()" style="margin-top:8px">Analyze with pasted text</button>
+        </div>
+      </div>
+
+      <!-- Loader -->
+      <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-steps" id="loader-steps"></div>
+      </div>
+
+      <!-- Results -->
+      <div class="results" id="results">
+        <div class="result-url" id="result-url"></div>
+
+        <!-- Overall score card -->
+        <div class="card">
+          <div class="dial-row">
+            <div class="dial">
+              <svg width="60" height="60" viewBox="0 0 60 60">
+                <circle cx="30" cy="30" r="24" fill="none" stroke="var(--blue-mid)" stroke-width="5"/>
+                <circle cx="30" cy="30" r="24" fill="none" stroke="var(--blue)" stroke-width="5" id="dial-circle" stroke-dasharray="150.8" stroke-dashoffset="150.8" stroke-linecap="round" transform="rotate(-90 30 30)"/>
+              </svg>
+              <div class="dial-num" id="dial-num">0%</div>
+            </div>
+            <div>
+              <div class="overall-label" id="overall-label">—</div>
+              <div class="overall-desc" id="overall-desc"></div>
+            </div>
+          </div>
+          <!-- Text AI -->
+          <div class="ai-row">
+            <div class="ai-label">AI-generated text</div>
+            <div class="bar-wrap"><div class="bar-fill" id="text-bar" style="width:0%;background:var(--blue)"></div></div>
+            <div class="ai-val" id="text-val" style="color:var(--blue)">—</div>
+          </div>
+          <div class="ai-note" id="text-note"></div>
+        </div>
+
+        <!-- Alignment matches -->
+        <div class="card">
+          <div class="card-label">Narrative alignment</div>
+          <div id="primary-matches"></div>
+          <div id="secondary-matches"></div>
+          <!-- Convergent interest -->
+          <div id="convergent-card" style="display:none">
+            <div class="convergent-box">
+              <div class="conv-header">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h9" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round"/></svg>
+                Hidden convergent interest
+              </div>
+              <div class="conv-entities" id="conv-entities"></div>
+              <div class="conv-outcome" id="conv-outcome"></div>
+              <div class="conv-explanation" id="conv-explanation"></div>
+              <div id="conv-rival-tag" style="margin-top:5px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actor research -->
+        <div class="card">
+          <div class="card-label">Account</div>
+          <div class="actor-prompt" id="actor-prompt">
+            <div class="actor-prompt-text" id="actor-prompt-text"></div>
+            <div class="actor-prompt-btns">
+              <button class="btn-primary btn-sm" onclick="researchActor()">Research actor</button>
+              <button class="btn-primary btn-sm" style="background:var(--bg2);color:var(--text2);border:1.5px solid var(--border)" onclick="dismissActorPrompt()">Skip</button>
+            </div>
+          </div>
+          <div class="actor-result-card" id="actor-result-card">
+            <div id="actor-result-body"></div>
+          </div>
+          <div id="account-info" style="font-size:12px;color:var(--text3);font-weight:500">
+            Actor research available after scan completes.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HISTORY PAGE ── -->
+  <div class="page" id="page-history">
+    <div class="history-main">
+      <div class="page-header">
+        <h1>My history</h1>
+        <p>Your personal scan history — visible only to you</p>
+      </div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- ── ABOUT PAGE ── -->
+  <div class="page" id="page-about">
+    <div class="about-main">
+      <div class="page-header" style="margin-bottom:20px">
+        <h1>About</h1>
+      </div>
+      <div class="about-section">
+        <h2>What is Who's Behind That?</h2>
+        <p>Who's Behind That? is an AI-powered tool that analyzes social media posts to detect narrative alignment — whose political agenda a post serves, and what context it leaves out. It uses Claude AI to score posts against a database of 56 geopolitical entities.</p>
+        <p>This tool is designed for researchers, journalists, and media-literate individuals who want to understand the information landscape around the Israeli-Palestinian conflict.</p>
+      </div>
+      <div class="about-section">
+        <h2>How it works</h2>
+        <p>When you analyze a post, the text is sent to our server and scored by Claude AI against each entity's known interests, tactics, and public narrative. Results show which entities benefit most from the post being spread — both directly (primary alignment) and indirectly (secondary alignment).</p>
+        <p>Each scan uses one of your 10 daily credits. Credits reset at midnight.</p>
+      </div>
+      <div class="about-section">
+        <h2>Privacy</h2>
+        <div class="disclaimer-box">
+          <p><strong>What we collect:</strong> The URL and text of posts you analyze, along with a randomly generated device identifier that links scans to your device. We do not collect your name, email, or any personal information.</p>
+          <p style="margin-top:8px"><strong>Who can see your scans:</strong> Your scan history is private to your device. The service operator may access anonymized scan data for the purpose of improving the tool.</p>
+          <p style="margin-top:8px"><strong>Data retention:</strong> Scan data is retained for service operation purposes. You may request deletion by contacting us.</p>
+        </div>
+      </div>
+      <div class="about-section">
+        <h2>Contact</h2>
+        <p>Questions, feedback, or data deletion requests: <a href="mailto:contact@example.com" id="contact-email">contact@example.com</a></p>
+        <p>This tool is for research and media literacy purposes only. Results are AI-generated and should not be treated as definitive conclusions.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end layout -->
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+  <span><span class="status-dot" id="status-dot"></span><span id="status-text">Connecting...</span></span>
+  <div class="bar-divider"></div>
+  <span id="app-ver-label">app v1.0.0</span>
+  <div class="bar-divider"></div>
+  <span id="srv-ver-label">srv —</span>
+  <div class="bar-right">For research and media literacy purposes · © 2026</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_ENTITIES = [
+  // ── NATION STATES ──
+  { id:1, name:"Israel (Netanyahu government)", type:"Nation state", narrative:"Israel is exercising its inherent right to self-defense following the October 7, 2023 Hamas terrorist attack. Goals: eliminate Hamas military and governing capabilities, secure return of all hostages, and prevent Gaza from being used as a future base for attacks. Israel maintains it targets Hamas infrastructure, not civilians.", interest:"Permanently dismantling Hamas as a military force, preventing Iranian regional hegemony, maintaining military superiority, and—for Netanyahu's coalition—avoiding political collapse and delaying accountability for October 7 intelligence failures.", mo:"Sustained air and ground campaign in Gaza; economic blockade; targeted assassinations of Hamas/Hezbollah leadership; pager/walkie-talkie attacks on Hezbollah; diplomatic pressure to block ICC/ICJ proceedings; leveraging U.S. military aid.", comments:"Netanyahu faces ICC arrest warrant. Far-right coalition partners (Ben Gvir, Smotrich) push for annexation and oppose any two-state solution." },
+  { id:2, name:"United States", type:"Nation state", narrative:"Affirms Israel's right to self-defense while calling for civilian protection and humanitarian access. Trump administration unveiled a plan favoring Israeli security interests, floated Gaza displacement proposals, and signaled reduced pressure on Israel.", interest:"Maintaining a stable pro-Western Middle East; protecting Israel as a strategic ally; managing oil flows; securing Saudi normalization; preventing Iran from gaining nuclear capability or regional dominance.", mo:"$22+ billion military aid to Israel since Oct 7; UN Security Council vetoes on ceasefire resolutions; diplomatic brokering; military presence in region; sanctions on select parties.", comments:"Deepest domestic political division on this issue in decades. The U.S. remains the most powerful external actor in the conflict." },
+  { id:3, name:"Iran", type:"Nation state", narrative:"Supports 'the Palestinian resistance' (المقاومة الفلسطينية) against 'Zionist occupation' (الاحتلال الصهيوني). Denies directly ordering proxy attacks, framing support as backing oppressed Muslims. Promotes the 'Axis of Resistance' (محور المقاومة) as the only legitimate response to Western imperialism. Officials have called for the 'elimination of the Zionist entity' through referendum.", interest:"Extend regional influence via proxy network; bog down Israel and the U.S.; prevent Arab-Israeli normalization (التطبيع) especially Saudi; maintain the Axis of Resistance as a deterrent against attack on Iran's nuclear program.", mo:"Funding and arming Hamas, Hezbollah, PIJ, and Houthis; IRGC Quds Force coordination; missile and drone technology transfers; financial transfers via shell entities; Al-Manar and Press TV as media instruments; promoting anti-normalization (مناهضة التطبيع) messaging across Arab social media.", comments:"Iran's direct strikes on Israel in April and October 2024 marked historic escalation. Proxy network significantly degraded since October 2023." },
+  { id:4, name:"Qatar", type:"Nation state", narrative:"Supports Palestinian statehood and condemns Israeli military operations as disproportionate. Frames itself as neutral mediator and humanitarian donor, hosting Hamas's political bureau at joint U.S.-Israel request.", interest:"Use unique mediator position to elevate international status, deter Saudi/UAE hostility, and protect itself through strategic irreplaceability — indispensable to all sides. Al Jazeera as soft-power instrument.", mo:"Hosting Hamas political leadership in Doha; mediating ceasefire and hostage negotiations; Al Jazeera media influence; financial support for Gaza; hosting U.S. Al Udeid airbase as insurance.", comments:"Relations with Israel deteriorated sharply after Israeli strike in Doha area in September 2025." },
+  { id:5, name:"Egypt", type:"Nation state", narrative:"Calls for ceasefire, increased humanitarian aid, and political solution based on two-state framework. Controls Rafah crossing and presents itself as key regional broker.", interest:"Preventing Palestinian displacement into Sinai — which would destabilize the peninsula and undermine the Israel peace treaty. Maintaining its role as the indispensable Arab mediator.", mo:"Controlling Rafah crossing as leverage; hosting negotiation rounds; coordinating with the U.S. and Qatar; proposing its own Gaza reconstruction plan as alternative to U.S. displacement proposals.", comments:"Egypt faces significant domestic economic pressure and fears refugee flows could fuel Sinai-based militant groups." },
+  { id:6, name:"Saudi Arabia", type:"Nation state", narrative:"Supports Palestinian state and condemns excessive force against civilians. Crown Prince MBS has made normalization with Israel conditional on credible progress toward Palestinian statehood.", interest:"Securing a U.S. defense pact and nuclear cooperation deal, using normalization with Israel as the price tag — but only on terms that don't ignite Arab street backlash. Maximize leverage to extract maximum concessions.", mo:"Withholding normalization as strategic leverage; leading Arab diplomatic coalitions; conditioning recognition on Palestinian statehood; diversifying partnerships toward China.", comments:"Normalization was near-certain before Oct 7. The war shattered that timeline. Saudi leverage has grown from its willingness to hold out." },
+  { id:7, name:"Turkey", type:"Nation state", narrative:"Erdoğan has been among the most vocal critics of Israel, comparing its actions to Nazi Germany, severing trade relations, and supporting the South Africa genocide case at the ICJ.", interest:"Serving Erdoğan's domestic political needs (strong pro-Palestinian sentiment); positioning Turkey as the leader of the Sunni Muslim world; expanding regional influence in any post-war Gaza governance.", mo:"Hosting Hamas political leaders; filing cases at international courts; suspending trade with Israel; seeking guarantor role in ceasefire; leveraging state media.", comments:"Israel rejected Turkey's formal mediation role. Turkey's trade suspension has limited economic but significant symbolic impact." },
+  { id:8, name:"Jordan", type:"Nation state", narrative:"Calls for two-state solution, end to Israeli occupation, and protection of Palestinian civilians. King Abdullah II has warned of catastrophic consequences of mass Palestinian displacement into Jordan.", interest:"Jordan's existential interest is preventing Palestinian mass displacement — Jordan is already 60%+ Palestinian-origin. Displacement would destabilize the Hashemite Kingdom and threaten the monarchy's survival.", mo:"Diplomatic statements; maintaining peace treaty with Israel while managing domestic opposition; hosting Arab diplomatic summits; threatening to suspend Jordan-Israel peace treaty if displacement occurs.", comments:"Jordan shot down Iranian drones during April 2024 Iran-Israel exchange — a remarkable act that reflects Jordan's interest in regional stability over Arab solidarity." },
+  { id:9, name:"United Arab Emirates", type:"Nation state", narrative:"Calls for humanitarian protection and a two-state solution. Maintains the 2020 Abraham Accords normalization with Israel but has publicly criticized Israeli military operations in Gaza.", interest:"UAE's primary interest is protecting the Abraham Accords investment and its modernization narrative, while managing public opinion at home. Wants post-war Gaza stability that validates the normalization path.", mo:"Quiet diplomacy; maintaining trade and security ties with Israel; pledging Gaza reconstruction funds; using normalization as leverage to push for Israeli restraint.", comments:"UAE was the first Gulf state to normalize with Israel. The war put the Abraham Accords under significant domestic pressure in the UAE." },
+  { id:10, name:"Bahrain", type:"Nation state", narrative:"Signed Abraham Accords in 2020. Has called for ceasefire and protection of civilians while maintaining normalization framework with Israel.", interest:"Bahrain's interest is maintaining the Abraham Accords as a source of U.S. security guarantees and regional stability. Deeply dependent on Saudi Arabia and U.S. backing for regime survival.", mo:"Following Saudi diplomatic lead closely; quiet bilateral ties with Israel; hosting U.S. Fifth Fleet as security guarantee.", comments:"Bahrain's domestic Shia majority is strongly pro-Palestinian — the government faces real internal pressure over normalization." },
+  { id:11, name:"Morocco", type:"Nation state", narrative:"Normalized with Israel in 2020 (Abraham Accords) in exchange for U.S. recognition of Moroccan sovereignty over Western Sahara. Calls for two-state solution and humanitarian protection.", interest:"Morocco's primary interest in the conflict is protecting the U.S. recognition of Western Sahara — which is contingent on the Abraham Accords remaining intact. Palestinian issue is secondary to this core interest.", mo:"Maintaining normalization despite domestic and pan-Arab pressure; quiet diplomatic coordination with Israel; hosting bilateral trade and tourism.", comments:"Morocco faces strong public pressure from a population deeply sympathetic to Palestinians — the government manages this through statements while keeping normalization intact." },
+  { id:12, name:"United Kingdom", type:"Nation state", narrative:"Affirms Israel's right to self-defense while calling for adherence to international humanitarian law, civilian protection, and a two-state solution. Has suspended some arms sales to Israel.", interest:"UK interests include maintaining the special relationship with the U.S. (which means Israel alignment), managing large British Muslim domestic constituency, upholding international law norms, and post-Brexit diplomatic relevance.", mo:"Partial arms embargo; diplomatic statements; participating in joint strikes against Houthis (Red Sea); co-sponsoring UN resolutions; maintaining bilateral trade with Israel.", comments:"UK suspended some F-35 component exports to Israel in 2024. Labour government under Starmer has taken slightly more critical stance than the Conservatives." },
+  { id:13, name:"France", type:"Nation state", narrative:"Supports Israel's right to self-defense while calling for civilian protection, a humanitarian pause, and a two-state solution. Macron has been more vocal than most Western leaders in criticizing Israeli military tactics.", interest:"France's interest is positioning itself as the lead European diplomatic voice on the conflict, protecting its substantial Muslim constituency domestically, maintaining influence in Lebanon (historic ties), and asserting EU diplomatic relevance.", mo:"Hosting diplomatic summits; proposing international observer forces; bilateral pressure on Israel; maintaining arms review; leading EU statements.", comments:"France has the largest Muslim population in Western Europe — domestic political pressure on this issue is significant for Macron and his successors." },
+  { id:14, name:"Germany", type:"Nation state", narrative:"Has been the most staunchly pro-Israel European nation due to Holocaust historical responsibility. Affirms Israel's right to exist and defend itself unconditionally.", interest:"Germany's primary interest is its historical obligation to Jewish security — this is embedded in the German constitution and national identity. Secondary interest is maintaining EU unity on foreign policy.", mo:"Strong diplomatic support for Israel; resisting EU arms embargoes; providing submarines to Israel; recently shifting toward more critical stance on humanitarian grounds as death toll rose.", comments:"Germany's unconditional support for Israel has faced growing internal pressure. Germany has begun to shift language on civilian protection in 2024-2025." },
+  { id:15, name:"Iraq", type:"Nation state", narrative:"Strongly opposes Israeli military operations in Gaza. Iraqi government and militia factions have framed the conflict as part of broader resistance to U.S.-Israeli hegemony in the region.", interest:"Iraq is divided — the formal government wants stability and U.S. investment, but Iran-aligned Shia militias (Popular Mobilization Forces) use the Palestinian cause to advance Iranian interests and domestic legitimacy.", mo:"Iraqi militias (Kataib Hezbollah etc.) launching drones at Israel and U.S. bases; formal government issuing condemnatory statements while avoiding direct confrontation; Iran channeling weapons through Iraqi territory.", comments:"Iraq is a key transit corridor for Iranian weapons to Hezbollah and Palestinian groups. The government has limited control over Iranian-aligned militias operating on its soil." },
+  { id:16, name:"Syria", type:"Nation state", narrative:"Assad government frames the conflict as Arab resistance to Zionism and Western imperialism. Palestinian camps in Syria have been sites of both solidarity and tragedy throughout the conflict's history.", interest:"Assad's interest is using the Palestinian cause rhetorically while leveraging the conflict to normalize his regime's international standing after the civil war. Now post-Assad under new Islamist-linked government with different calculus.", mo:"Allowing Iranian weapons transit; hosting Palestinian political factions; post-Assad Syria (HTS/Jolani government) recalibrating away from Iran's influence.", comments:"Syria under HTS since December 2024 is a fundamentally different actor than under Assad — the new government is distancing from Iran and seeking Western recognition." },
+
+  // ── TERROR ORGANIZATIONS & MILITIAS ──
+  { id:17, name:"Hamas", type:"Terror organization", narrative:"The armed resistance (المقاومة) against Israeli occupation and the only force genuinely fighting for Palestinian liberation. Justifies October 7 as a response to years of siege, blockade, and settler violence. Calls for full Palestinian sovereignty over historic Palestine and the 'right of return'. Frames fighters as martyrs (شهداء) and the conflict as a holy struggle (جهاد) against occupation (الاحتلال).", interest:"Survival as a governing and military entity; leverage for prisoner exchanges; preventing the PA from replacing it in Gaza; sustained armed conflict as the only path to its political goals.", mo:"Guerrilla warfare; tunnel networks; hostage-taking as bargaining chip; rocket attacks; embedding in civilian infrastructure; political bureau in Doha for diplomacy; martyrdom glorification (تمجيد الشهادة) in media; framing all violence as legitimate resistance (مقاومة مشروعة).", comments:"Top leadership (Haniyeh, Sinwar, Deif) assassinated by Israel in 2024. Mohammed Sinwar believed to be current Gaza commander. Organization has shown ability to reconstitute." },
+  { id:18, name:"Hezbollah", type:"Terror organization", narrative:"Resistance movement against Israeli occupation of Lebanese territory and defender of the Palestinian cause. Solidarity with Gaza; willingness to open a 'northern front' to pressure Israel.", interest:"Preserving military deterrence capability and political power in Lebanon; serving as Iran's forward shield; opening a second front exhausts Israeli military resources.", mo:"Rocket and missile barrages on northern Israel; cross-border incursions; Iran's primary regional proxy; political power within Lebanon through parliament; Al-Manar TV as media instrument.", comments:"Secretary-General Nasrallah killed September 2024. Organization significantly degraded by Israel's 2024 Lebanon campaign including the pager/walkie-talkie attacks." },
+  { id:19, name:"Palestinian Islamic Jihad (PIJ)", type:"Terror organization", narrative:"Total liberation of historic Palestine through armed resistance. Rejects all negotiations with Israel and any settlement short of full Palestinian sovereignty.", interest:"Armed resistance as both strategy and principle. Serves as Iran's most direct proxy in Gaza — often launching attacks on Iran's timetable rather than in Palestinian strategic interests.", mo:"Rocket attacks; coordinating with Hamas and Iran's IRGC; tunnel and guerrilla operations; refusing any ceasefire negotiations.", comments:"Smaller than Hamas but considered more hardline. Leadership based in Damascus with very direct IRGC ties." },
+  { id:20, name:"Houthis (Ansar Allah)", type:"Militia", narrative:"Missile attacks on Israel and Red Sea shipping are acts of solidarity with Palestinians in Gaza. 'Death to America, death to Israel.' Demands ceasefire and lifting of Gaza blockade.", interest:"Primarily domestic — using the Palestinian cause to legitimize Houthi governance in Yemen, build popular support, improve position in Saudi peace talks, assert regional power status.", mo:"Ballistic missiles and drones toward Israel and Eilat; attacking commercial ships in the Red Sea; threatening all vessels heading to Israeli ports; coordinating with Iran's IRGC.", comments:"Houthi leadership significantly struck by Israel and U.S. in 2024-2025. Resumed attacks on Israel in March 2026 amid U.S.-Israeli operations against Iran." },
+  { id:21, name:"Popular Front for the Liberation of Palestine (PFLP)", type:"Terror organization", narrative:"Marxist-Leninist secular Palestinian liberation organization. Frames the conflict as anti-imperialist struggle against Zionism and Western colonialism. Opposes Oslo Accords and any negotiated settlement.", interest:"Palestinian liberation through armed struggle; opposing both Islamist groups (Hamas/PIJ) and the PA as collaborationist; maintaining relevance as a secular leftist voice in Palestinian politics.", mo:"Historically: aircraft hijackings, assassinations (killed Israeli tourism minister 2001); currently: armed operations in West Bank; coalition with Hamas in Gaza while maintaining ideological independence.", comments:"Second-largest PLO faction. Receives some support from Syria and has historical ties to leftist international movements. Less active militarily than Hamas but influential ideologically." },
+  { id:22, name:"Muslim Brotherhood", type:"Int'l organization", narrative:"Pan-Islamic political movement that supports Palestinian self-determination as a religious and moral obligation. Frames the conflict through Islamic law and the duty of Muslim solidarity.", interest:"Using the Palestinian cause to advance political Islam globally; gaining legitimacy and recruits; pressuring secular Arab governments to align with Islamist positions.", mo:"Political mobilization in countries where it operates (Jordan, Egypt, Turkey-aligned); funding charitable networks used for political influence; media and da'wah (outreach) networks.", comments:"Hamas is the Palestinian branch of the Muslim Brotherhood. The Brotherhood's influence varies dramatically by country — banned in Egypt and UAE, tolerated in Jordan, allied with Erdoğan's AKP in Turkey." },
+
+  // ── PALESTINIAN AUTHORITY & OFFICIALS ──
+  { id:23, name:"Palestinian Authority (PA) / Mahmoud Abbas", type:"Politician", narrative:"Advocates for a two-state solution based on 1967 borders with East Jerusalem as capital. Opposes Hamas and claims to be the sole legitimate representative of the Palestinian people. Condemned October 7.", interest:"Political survival and reasserting PA control over Gaza post-war. Preventing Hamas from permanently replacing the PA. Securing international recognition and financial support.", mo:"UN diplomatic lobbying; engaging Arab and European states; international recognition of the PLO; security coordination with Israel in the West Bank (controversial); relying on international donor funds.", comments:"Abbas is 89 with no clear succession plan. The PA is widely seen as corrupt and ineffective. Last held elections in 2006." },
+  { id:24, name:"Hussein al-Sheikh", type:"Politician", narrative:"PLO Secretary-General and likely Abbas successor. Advocates for PA governance of Gaza post-war and a negotiated two-state solution. Positioned as a moderate pragmatist.", interest:"Positioning himself as Abbas's successor; consolidating PLO leadership; reasserting Fatah dominance over the Palestinian political landscape including Gaza.", mo:"Diplomatic meetings with Arab and Western leaders; building international support for PA role in post-war Gaza governance; managing relationship with Israel on security coordination.", comments:"Widely seen as the front-runner to lead the PA after Abbas. Has met with senior U.S. officials. His secular-nationalist approach contrasts sharply with Hamas's Islamism." },
+  { id:25, name:"Mohammed Sinwar", type:"Politician", narrative:"Believed to be Hamas's de facto military commander in Gaza following the assassinations of October 7-era leadership. Maintains Hamas's position: armed resistance until full Palestinian liberation.", interest:"Organizational survival of Hamas; maintaining armed resistance as Hamas's core identity; preventing any governance arrangement that marginalizes Hamas's military wing.", mo:"Underground command and control in Gaza tunnel network; maintaining military pressure on Israel; preventing ceasefire terms that would disarm or displace Hamas fighters.", comments:"Less publicly visible than his brother Yahya. Israel has made him a primary target. His continued operational capacity after sustained Israeli pressure is a significant intelligence challenge." },
+  { id:26, name:"Khaled Meshaal", type:"Politician", narrative:"Hamas political bureau leader based in Qatar. Frames the conflict as a legitimate resistance struggle and advocates for a unified Palestinian front under Hamas's leadership.", interest:"Maintaining Hamas's political legitimacy internationally; positioning himself within Hamas's post-October 7 leadership restructuring; securing continued Qatari and Iranian financial support.", mo:"International diplomatic meetings; media appearances on Al Jazeera and Arab networks; coordinating political positions between Hamas's external leadership and internal Gaza command.", comments:"Has been based outside Gaza for decades. Represents the more politically pragmatic wing of Hamas versus the hardline military wing inside Gaza." },
+
+  // ── ISRAELI POLITICIANS ──
+  { id:27, name:"Benjamin Netanyahu", type:"Politician", narrative:"The war is an existential fight for Israel's survival against 'the new Nazis.' Israel will not stop until Hamas is destroyed and all hostages returned. Opposes Palestinian state.", interest:"Personal political survival — a ceasefire risks collapse of his far-right coalition and could accelerate his corruption trial and ICC proceedings against him.", mo:"Maintaining coalition with Ben Gvir and Smotrich; delaying hostage deal negotiations when politically convenient; lobbying Washington; controlling military messaging.", comments:"ICC arrest warrant issued November 2024 for war crimes and crimes against humanity. Has affected his international travel and standing." },
+  { id:28, name:"Itamar Ben Gvir & Bezalel Smotrich", type:"Politician", narrative:"Advocate for Israeli annexation of the West Bank (יהודה ושומרון — Judea and Samaria), expanded settlements (התנחלויות), and blocking any Palestinian state. Called for voluntary emigration of Palestinians from Gaza and reestablishment of Israeli settlements. Frame sovereignty (ריבונות) as a religious and security imperative.", interest:"Using the war to permanently foreclose any two-state possibility and annex the West Bank. Hold Netanyahu's coalition hostage — their departure would collapse his government. Benefit from any content demanding harder enforcement against Palestinian construction or 'invasion' (פלישה).", mo:"Threatening coalition collapse to block ceasefire deals; blocking humanitarian aid; promoting West Bank settlement expansion; demanding enforcement (אכיפה) against Palestinian outposts and infrastructure; funding settler violence; inflammatory visits to Al-Aqsa; using sovereignty (ריבונות) and return (שיבה לארץ) language.", comments:"Both face U.S. and EU sanctions consideration. Ben Gvir stormed the military detention facility where soldiers accused of abuse were held." },
+  { id:29, name:"Benny Gantz", type:"Politician", narrative:"Supported entering the emergency war cabinet after October 7 but resigned in June 2024 over lack of a clear post-war strategy. Advocates for a hostage deal and a credible day-after plan for Gaza.", interest:"Positioning himself as the centrist alternative to Netanyahu — responsible, security-focused, but not extremist. Building support for the next Israeli election, whenever it comes.", mo:"Public criticism of war cabinet decision-making; advocating for hostage deal priority; media appearances; building coalition with other centrist parties.", comments:"His resignation from the war cabinet was a significant political moment, signaling the governing coalition's internal fractures over war aims." },
+
+  // ── U.S. POLITICIANS ──
+  { id:30, name:"Donald Trump", type:"Politician", narrative:"Strong support for Israel and expansive Israeli war aims. Proposed 'riviera' plan for Gaza involving displacing Palestinians to Egypt and Jordan. Mediated the January 2025 ceasefire phase agreement.", interest:"Securing a major Middle East 'deal' as a legacy achievement; pleasing pro-Israel evangelical and donor base; weakening Iran's regional position; extracting economic and diplomatic concessions from Gulf states.", mo:"Proposing and pressuring parties toward his own peace framework; granting Israel more military latitude than Biden; pressuring Saudi Arabia toward normalization; floating Gaza displacement as U.S. policy.", comments:"Gaza displacement proposal rejected by Egypt, Jordan, Saudi Arabia, Turkey, and all EU nations. Relationship with Netanyahu is the warmest of any U.S. president." },
+  { id:31, name:"JD Vance", type:"Politician", narrative:"Supports Israel's right to defend itself. More isolationist instinct than traditional Republicans on foreign aid but has not broken with the administration's pro-Israel stance.", interest:"Building his own foreign policy brand distinct from both neoconservatism and pure isolationism; positioning for potential future presidential run; maintaining base of MAGA voters who are pro-Israel but anti-foreign-entanglement.", mo:"Senate speeches and media appearances; aligning with Trump's Middle East framework while occasionally signaling skepticism of open-ended commitments; focus on Iran nuclear deal opposition.", comments:"Vance's foreign policy views are still evolving. His 'America First' instincts sometimes pull against Israel hawk positions, creating occasional tension within the administration." },
+  { id:32, name:"Marco Rubio", type:"Politician", narrative:"As Secretary of State, strongly supports Israel's right to defend itself and opposes any pressure on Israel to limit its military operations. Hawkish on Iran.", interest:"Projecting U.S. strength in the Middle East; containing Iran; maintaining Israel as a key U.S. ally; advancing Republican foreign policy credentials.", mo:"Diplomatic pressure on parties to support U.S.-Israel positions; advocating against ICC jurisdiction over Israeli officials; managing ceasefire negotiations to favor Israeli interests.", comments:"Rubio is one of the most hawkish voices in the administration on both Israel and Iran. His positions have significant influence on U.S. diplomatic posture." },
+  { id:33, name:"AOC / US Progressive Caucus", type:"Politician", narrative:"Calls for immediate ceasefire, end to U.S. military aid to Israel, arms embargo, and recognition of Palestinian statehood. Frames Israeli military operations as collective punishment and calls for ICC accountability.", interest:"Representing a large and growing progressive Democratic constituency that is increasingly critical of U.S.-Israel policy; building political brand around human rights and anti-militarism; pressuring the Democratic Party establishment.", mo:"Congressional speeches; social media with massive following (AOC has 13M+ Twitter followers); pushing legislation to condition military aid; organizing progressive blocs to vote against Israel aid packages.", comments:"The progressive caucus's influence has grown significantly among younger Democrats. Their positions represent a real shift in the Democratic Party's internal balance on this issue." },
+
+  // ── INTERNATIONAL ORGANIZATIONS ──
+  { id:34, name:"United Nations / UNRWA", type:"Int'l organization", narrative:"Calls for immediate ceasefire, unrestricted humanitarian access, protection of civilians, and a political solution based on established UN resolutions. UNRWA is the primary humanitarian services provider for Palestinians.", interest:"Upholding international humanitarian law and institutional legitimacy. UNRWA specifically fights for its own survival as an organization amid Israeli efforts to dismantle it.", mo:"Security Council resolutions (often vetoed by U.S.); General Assembly votes; ICJ and ICC proceedings; UNRWA humanitarian operations; public reporting on casualties, famine, and water deprivation.", comments:"Israel passed a law banning UNRWA operations in November 2024, accusing some staff of involvement in October 7. Several donor countries temporarily froze funding." },
+  { id:35, name:"European Union", type:"Int'l organization", narrative:"Supports a two-state solution; calls for humanitarian access; condemned both October 7 attacks and scale of Israeli military operations. Member states are deeply divided.", interest:"Maintaining relevance as a diplomatic actor; managing refugee flows; protecting trade routes; upholding international rules-based order; managing internal EU divisions between pro-Israel and critical member states.", mo:"Targeted sanctions on extremist Israeli settlers; suspension of some arms sales; financial support for UNRWA; joint diplomatic statements; recognition of Palestinian statehood by some members (Spain, Ireland, Norway).", comments:"EU unity is extremely fragile. Hungary and Germany have often blocked more critical EU stances toward Israel." },
+  { id:36, name:"ICC / ICJ", type:"Int'l organization", narrative:"The ICC investigates alleged war crimes and crimes against humanity by all parties. The ICJ adjudicates state disputes under international law, including South Africa's genocide case against Israel.", interest:"Institutional interest in asserting jurisdiction and establishing precedents for international accountability — regardless of which states or individuals are involved.", mo:"ICC arrest warrants (Netanyahu, Gallant, Hamas leaders); ICJ preliminary rulings; South Africa genocide case proceedings; investigations into conduct of all parties.", comments:"The ICC warrants for Netanyahu and Gallant were historic — first time sitting leaders of a close Western ally faced such action. The U.S. sanctioned ICC prosecutor Karim Khan in response." },
+  { id:37, name:"Arab League", type:"Int'l organization", narrative:"Calls for ceasefire, two-state solution, and end to Israeli occupation. Has historically been the formal vehicle for coordinated Arab state positions on the Palestinian issue.", interest:"Maintaining relevance as Arab states increasingly pursue independent bilateral policies. Providing diplomatic cover for member states that want to appear pro-Palestinian while privately pursuing other interests.", mo:"Joint diplomatic statements; coordinating positions at UN; Arab Peace Initiative (still nominally on the table); summits producing declarations.", comments:"The Arab League has been significantly weakened by the Abraham Accords and bilateral Arab-Israel normalization. Its statements carry less weight than direct bilateral diplomacy." },
+  { id:38, name:"Organisation of Islamic Cooperation (OIC)", type:"Int'l organization", narrative:"Represents 57 Muslim-majority states. Consistently calls for end to Israeli occupation, protection of Palestinian rights, and Al-Aqsa Mosque sovereignty for Muslims.", interest:"Demonstrating Islamic solidarity while managing deep divisions among member states (some of which have normalized with Israel). Maintaining relevance as the voice of the Muslim world.", mo:"Emergency summits; joint statements; diplomatic pressure; coordinating positions at UN General Assembly.", comments:"Like the Arab League, the OIC's actual influence is limited. Its statements reflect political consensus rather than operational coordination." },
+
+  // ── CIVIL SOCIETY & ADVOCACY ──
+  { id:39, name:"AIPAC (American Israel Public Affairs Committee)", type:"Int'l organization", narrative:"Advocates for strong U.S.-Israel relationship, U.S. military aid to Israel, and U.S. diplomatic support for Israeli security interests. Frames Israel as a critical U.S. ally and the only democracy in the Middle East.", interest:"Maintaining and strengthening U.S. military and diplomatic support for Israel; defeating candidates who advocate conditioning aid; ensuring bipartisan pro-Israel consensus in U.S. politics.", mo:"Political donations (Super PAC spending); lobbying Congress; electoral intervention against progressive critics of Israel; coalition building with evangelical Christian organizations.", comments:"AIPAC spent over $100 million in the 2024 election cycle, primarily targeting progressive Democrats critical of Israel. It has become more overtly partisan in recent years." },
+  { id:40, name:"J Street", type:"Int'l organization", narrative:"Pro-Israel, pro-peace U.S. advocacy organization. Supports a two-state solution, opposes Israeli settlement expansion, and advocates for conditioning U.S. military aid on Israeli compliance with international law.", interest:"Representing American Jews who support Israel's existence but oppose Netanyahu's policies and the occupation. Providing political cover for Democrats who want to criticize Israeli policies without being labeled anti-Israel.", mo:"Lobbying Congress; electoral endorsements of pro-peace candidates; public campaigns; coalition building with progressive organizations.", comments:"J Street positions itself as the alternative to AIPAC — pro-Israel but critical of specific policies. Its influence has grown among younger American Jews." },
+  { id:41, name:"B'Tselem", type:"Int'l organization", narrative:"Israeli human rights organization documenting Israeli human rights violations against Palestinians in the West Bank and Gaza. Has called Israeli policy in the occupied territories a form of apartheid.", interest:"Institutional interest in documenting and publicizing human rights violations to create accountability pressure on the Israeli government. Funded primarily by European governments and foundations.", mo:"Field documentation of incidents; publishing reports widely cited by international media and governments; legal submissions to ICC and Israeli courts; media appearances.", comments:"B'Tselem's 'apartheid' designation was highly controversial and influential. The Israeli government has attempted to delegitimize it as a foreign-funded political organization." },
+  { id:42, name:"Amnesty International", type:"Int'l organization", narrative:"Documents human rights violations by all parties. Has accused Israel of committing apartheid and genocide, and has documented Hamas war crimes. Calls for ICC accountability for all parties.", interest:"Institutional credibility as a neutral human rights monitor; donor funding dependent on maintaining reputation for evenhandedness; institutional interest in expanding ICC jurisdiction and international law application.", mo:"Reports on civilian casualties, use of white phosphorus, starvation as weapon; calling for arms embargoes; submitting evidence to ICC; public advocacy campaigns.", comments:"Amnesty's 'genocide' determination was extremely controversial and disputed by many legal scholars. Israel has rejected its findings entirely." },
+  { id:43, name:"Human Rights Watch", type:"Int'l organization", narrative:"Similar to Amnesty — documents violations by all parties. Has accused Israel of using starvation as a weapon of war and has documented Hamas's targeting of Israeli civilians on October 7.", interest:"Institutional credibility; donor funding; expanding international law accountability mechanisms; maintaining relevance in an increasingly contested human rights landscape.", mo:"Field investigations; detailed reports; media engagement; legal submissions to international bodies; advocacy for arms embargoes.", comments:"HRW and Amnesty's reports are widely cited by critics of Israel and dismissed by supporters. Their methodology and funding sources are frequently contested." },
+
+  // ── OTHER KEY ACTORS ──
+  { id:44, name:"Russia", type:"Nation state", narrative:"Calls for ceasefire and two-state solution, presenting itself as a neutral party. Hosts Hamas political delegations in Moscow.", interest:"Using the conflict to deflect global attention from Ukraine, deepen Western divisions, strengthen ties with the Arab world and Global South, and undermine U.S. credibility as a peace broker.", mo:"UN veto coordination; hosting Hamas delegations; leveraging RT and state media for pro-Palestinian messaging that also weakens Western narratives; diplomatic outreach to Arab states.", comments:"Russia's position is largely opportunistic. It benefits strategically from prolonged Western distraction." },
+  { id:45, name:"China", type:"Nation state", narrative:"Supports Palestinian statehood and two-state solution. Has condemned civilian casualties and called for ceasefire at the UN. Brokered 2023 Iran-Saudi Arabia rapprochement.", interest:"Expanding influence in Arab and Muslim world; positioning as a constructive alternative to U.S.-led order; protecting oil supply relationships with Gulf states; building 'Global South' coalition against Western hegemony.", mo:"UN diplomatic statements; offering itself as peace mediator; maintaining economic ties with both Israeli and Arab partners; state media narratives emphasizing U.S. hypocrisy.", comments:"China has limited leverage over the conflict's actual parties but uses it effectively in its competition with the U.S. for global influence." },
+  { id:46, name:"South Africa", type:"Nation state", narrative:"Filed genocide case against Israel at the ICJ in December 2023. Frames the conflict through its own historical experience of apartheid and draws explicit parallels to Israel's treatment of Palestinians.", interest:"Positioning South Africa as a leader of the Global South and champion of international law against powerful states; ANC domestic politics — the Palestinian cause resonates deeply with ANC's liberation movement identity.", mo:"ICJ genocide case submissions; diplomatic coalitions with other Global South states; hosting Palestinian delegations; bilateral sanctions consideration.", comments:"South Africa's ICJ case has been the most legally significant international challenge to Israel's conduct. The preliminary ruling found plausible genocide claims and ordered Israel to prevent genocidal acts." },
+  { id:47, name:"Israeli Settler Movement", type:"Int'l organization", narrative:"Jewish people have a biblical and historical right to settle all of the Land of Israel, including the West Bank (יהודה ושומרון — Judea and Samaria). Settlement expansion is a religious obligation and a security necessity. Frame Palestinian construction as invasion (פלישה) and illegal encroachment requiring state enforcement (אכיפה). Demand sovereignty (ריבונות) over all biblical lands.", interest:"Permanent Israeli control over the West Bank; preventing any Palestinian state; using the Gaza war as an opportunity to expand settlements and apply Israeli law to the West Bank; demanding enforcement against Palestinian infrastructure before it creates facts on the ground.", mo:"Settler violence against Palestinians; building new outposts (מאחזים); lobbying Ben Gvir and Smotrich; blocking IDF action against settlers; framing Palestinian construction as invasion (פלישה) requiring immediate enforcement response; creating facts on the ground that make a two-state solution physically impossible; using social media to demand action on infrastructure enforcement.", comments:"Settler violence in the West Bank has increased dramatically since October 7. Several settler leaders have openly called for resettling Gaza. The U.S. and EU have sanctioned specific settlers." },
+  { id:48, name:"Palestinian Diaspora / BDS Movement", type:"Int'l organization", narrative:"Calls for boycott, divestment, and sanctions against Israel until it ends occupation, grants equal rights to Arab citizens, and allows Palestinian refugee return. Frames this as non-violent pressure strategy.", interest:"Building international pressure on Israel through economic and cultural isolation; keeping the Palestinian cause on the global agenda; creating political costs for governments that support Israel unconditionally.", mo:"Campus organizing; corporate divestment campaigns; cultural boycotts (artists refusing to perform in Israel); targeting Israeli exports; legal campaigns in various countries.", comments:"BDS has achieved some corporate divestments and cultural boycotts but has been countered by anti-BDS legislation in many U.S. states and European countries. Its 'right of return' demand is rejected by most Israeli political parties as incompatible with a Jewish state." },
+  { id:49, name:"Evangelical Christian Zionists (U.S.)", type:"Int'l organization", narrative:"Israel's existence and the Jewish people's return to their homeland are fulfillment of biblical prophecy. Christians have a religious obligation to support Israel. Oppose any division of Jerusalem or Israeli land.", interest:"Ensuring U.S. political and military support for Israel remains unconditional; blocking any peace deal that divides Jerusalem; supporting Israeli sovereignty over biblical lands including the West Bank.", mo:"Political lobbying through organizations like Christians United for Israel (CUFI); electoral mobilization of evangelical voters; fundraising for Israeli settlements; pro-Israel media.", comments:"Evangelical Christians are one of the most reliably pro-Israel constituencies in the U.S. Their support is a key factor in Republican Party's near-unconditional backing of Israel." },
+  { id:50, name:"Global Jihadist Networks (Al-Qaeda / ISIS affiliates)", type:"Terror organization", narrative:"Frame the Israeli-Palestinian conflict as part of a cosmic war between Islam and the West/Zionism. Use Gaza civilian casualties as recruitment material and justification for attacks globally.", interest:"Using the conflict to recruit, radicalize, and incite attacks in Western countries and against Israel. Gaza imagery serves as the most powerful radicalization content available.", mo:"Online propaganda using Gaza imagery; inciting 'lone wolf' attacks in Western cities; recruitment messaging framing Gaza as proof that the West wages war on Islam; attempting to exploit conflict to expand influence at Hamas's expense.", comments:"ISIS and Al-Qaeda actually have complex relationships with Hamas — both have criticized Hamas for being too 'nationalist' rather than sufficiently Islamist. But they exploit the conflict heavily for their own purposes." },
+
+  // ── ISRAELI DOMESTIC OPPOSITION ──
+  { id:51, name:"Israeli Opposition Bloc (Lapid / Yesh Atid)", type:"Politician", narrative:"Advocates for a hostage deal (עסקת חטופים) as the top priority, a credible post-war governance plan for Gaza, and a return to a path toward a two-state solution. Frames Netanyahu's continued leadership as an obstacle to both security and democratic norms. Uses 'Bibiism' (ביביזם) as a term for the culture of blind loyalty to Netanyahu above national interest. Calls for accountability (אחריותיות) for October 7 failures.", interest:"Replacing Netanyahu as Prime Minister; forcing early elections (בחירות מוקדמות); positioning Lapid as the responsible centrist alternative. Benefits from any narrative that delegitimizes Netanyahu personally or highlights his coalition's extremism or the government's failure to secure the hostages.", mo:"Parliamentary opposition; weekly media appearances attacking government war management; emphasizing hostage families' demands; highlighting coalition dependence on Ben Gvir and Smotrich (ביביזם); using terms like 'surrender to coalition' (כניעה לקואליציה) and 'Netanyahu chooses his seat over the hostages'; international lobbying.", comments:"Yair Lapid leads the largest opposition party. The term 'Bibiism' (ביביזם) has become the central framing of the Israeli opposition — any post using it almost certainly serves this entity." },
+
+  { id:52, name:"Israeli Protest Movement", type:"Int'l organization", narrative:"The ongoing mass protest movement (מחאה) calling for a hostage deal (עסקת חטופים), early elections (בחירות מוקדמות), and Netanyahu's resignation. Frames itself as defending Israeli democracy (דמוקרטיה) against a government that prioritizes political survival over the hostages and national security. Uses terms like 'the government abandoned the hostages' (הממשלה זנחה את החטופים).", interest:"Forcing elections and removing Netanyahu from power. Benefits from any content that highlights government failures, hostage suffering, October 7 accountability (אחריות ל-7 באוקטובר), or coalition extremism.", mo:"Weekly mass demonstrations (הפגנות) in Tel Aviv and Jerusalem; blocking roads; protests outside the Knesset and Netanyahu's residence; international media engagement; coordination with hostage families forum; using 'Bibiism' (ביביזם) framing.", comments:"One of the largest sustained civil society mobilizations in Israeli history. Its messaging heavily emphasizes personal accountability for October 7 failures." },
+
+  { id:53, name:"Israeli Hostage Families Forum", type:"Int'l organization", narrative:"Represents families of the hostages (חטופים) taken on October 7. Demands an immediate deal (עסקה עכשיו) to secure all hostages' return, framing this as the singular moral and strategic priority above all other war aims. Uses 'bring them home' (להחזיר אותם הביתה) as central framing. Explicitly critical of Netanyahu when deal negotiations stall.", interest:"Securing the return of their family members through a negotiated deal. Has become a distinct political actor that sometimes clashes with the government when their singular focus on the deal diverges from other agendas.", mo:"Press conferences; international lobbying; public emotional appeals; meeting with foreign leaders; coordinating with protest movement; using 'the government chose the seat over the hostages' (הממשלה בחרה בכיסא על פני החטופים) messaging.", comments:"Enormous moral authority in Israeli society and internationally. Their statements criticizing Netanyahu have been among the most politically damaging attacks on his government." },
+
+  { id:54, name:"Avigdor Lieberman / Yisrael Beiteinu", type:"Politician", narrative:"Fiercely anti-Netanyahu despite being a right-wing, security-hawkish politician. Advocates for dismantling Hamas completely, opposing ultra-Orthodox draft exemptions, and secular governance. Frames Netanyahu's reliance on Ben Gvir and Smotrich as a national security threat.", interest:"Replacing Netanyahu with a secular right-wing government that excludes the ultra-Orthodox and religious nationalist parties. Lieberman's base is largely Russian-Israeli secular voters who are hawkish on security but hostile to religious coercion and Haredi political power.", mo:"Sharp parliamentary and media attacks on Netanyahu; exploiting the contradiction between Netanyahu's security-hawk image and his dependence on coalition partners who block military draft equality; positioning as the 'real right' versus what he calls Netanyahu's corrupt populism.", comments:"Lieberman is a uniquely awkward figure — right-wing on security, left-wing on religion and state, and personally consumed by hatred of Netanyahu after years as his coalition partner. His voters are among the most skeptical of any deal with Hamas." },
+
+  { id:55, name:"Israeli Left / Peace Camp (Meretz / Peace Now)", type:"Politician", narrative:"Advocates for an immediate ceasefire, end to occupation, two-state solution, and Israeli accountability for civilian casualties in Gaza. Frames the war as an opportunity to end the occupation rather than entrench it. Supports ICC jurisdiction over Israeli officials.", interest:"Ending the occupation and achieving a negotiated two-state solution. Politically marginalized since October 7 but representing a consistent ideological position that benefits from any narrative highlighting Palestinian civilian suffering, Israeli military excesses, or the futility of military solutions.", mo:"Public advocacy; international media; joint Israeli-Palestinian civil society activities; supporting B'Tselem and human rights documentation; backing ICC proceedings; demonstrating against both the war and the occupation.", comments:"Meretz fell below the electoral threshold in the 2022 elections. The Israeli left is at its weakest point in decades following October 7, as the attack discredited the 'partner for peace' argument in mainstream Israeli discourse. But it remains a coherent voice internationally." },
+
+  { id:56, name:"Arab Citizens of Israel / Joint List", type:"Politician", narrative:"Represents Arab Palestinian citizens of Israel (approximately 20% of the population). Calls for ceasefire, end to occupation, equal civil rights within Israel, and accountability for civilian deaths in Gaza. Frames the war as revealing the systemic discrimination faced by Arab citizens.", interest:"Protecting the rights and political representation of Arab citizens of Israel; preventing the war from being used to justify further marginalization; maintaining political relevance in the Knesset despite enormous social pressure following October 7.", mo:"Parliamentary opposition; public statements; international outreach; documenting anti-Arab discrimination within Israel during wartime; coordinating with Palestinian civil society.", comments:"Arab citizens of Israel faced significant social hostility after October 7. Several Arab politicians were temporarily suspended from the Knesset. Their political voice has been severely constrained by the wartime atmosphere but remains a distinct and important domestic constituency." }
+];
+
+
+const ENTITY_RELATIONS = {
+  // Format: id -> { patrons: [], proxies: [], coalition: [], rivals: [] }
+  // Iran's axis
+  3:  { patrons: [], proxies: [17,18,19,20], coalition: [17,18,19,20], rivals: [1,27,28,29,51,52,53,54] },
+  // Hamas
+  17: { patrons: [3], proxies: [], coalition: [3,18,19,20,22], rivals: [1,23,27,28,29,51,52,53] },
+  // Hezbollah
+  18: { patrons: [3], proxies: [], coalition: [3,17,19,20], rivals: [1,27,28,29] },
+  // PIJ
+  19: { patrons: [3], proxies: [], coalition: [3,17,18], rivals: [1,23,27,28] },
+  // Houthis
+  20: { patrons: [3], proxies: [], coalition: [3,17,18], rivals: [1,2,27] },
+  // Israel / Netanyahu
+  1:  { patrons: [], proxies: [], coalition: [2,27,28,29,39,49], rivals: [3,17,18,19,20,51,52,53,55,56] },
+  27: { patrons: [], proxies: [], coalition: [1,2,28,49], rivals: [3,17,51,52,53,54,55] },
+  28: { patrons: [], proxies: [], coalition: [1,27], rivals: [3,17,51,52,53,54,55,56] },
+  // Israeli opposition / protest / hostage families
+  51: { patrons: [], proxies: [], coalition: [52,53,54,55,56], rivals: [1,27,28,3,17] },
+  52: { patrons: [], proxies: [], coalition: [51,53,54,55], rivals: [1,27,28] },
+  53: { patrons: [], proxies: [], coalition: [51,52,54], rivals: [1,27,28] },
+  54: { patrons: [], proxies: [], coalition: [51,52,53], rivals: [1,27,28,3,17] },
+  55: { patrons: [], proxies: [], coalition: [51,52,53,56,41,42,43,36], rivals: [1,27,28,39,49] },
+  56: { patrons: [], proxies: [], coalition: [51,55,23], rivals: [1,27,28] },
+  // US
+  2:  { patrons: [], proxies: [], coalition: [1,27,39,49], rivals: [3,17,18,19,20,45,44] },
+  30: { patrons: [], proxies: [], coalition: [2,1,27,39,49], rivals: [33,3,17] },
+  31: { patrons: [], proxies: [], coalition: [2,30,32], rivals: [33,3,17] },
+  32: { patrons: [], proxies: [], coalition: [2,30,31], rivals: [33,3,17] },
+  33: { patrons: [], proxies: [], coalition: [40,41,42,43,55,36], rivals: [2,30,31,32,39,49] },
+  // PA
+  23: { patrons: [], proxies: [], coalition: [5,56], rivals: [17,19,28] },
+  24: { patrons: [], proxies: [], coalition: [23,5], rivals: [17,19,28] },
+  // Russia / China — opportunistic alignment
+  44: { patrons: [], proxies: [], coalition: [45,3], rivals: [2,30,31,32] },
+  45: { patrons: [], proxies: [], coalition: [44,3], rivals: [2,30,31,32] },
+  // Human rights / int'l law bloc
+  41: { patrons: [], proxies: [], coalition: [42,43,36,37,55,33], rivals: [1,27,28,39,49] },
+  42: { patrons: [], proxies: [], coalition: [41,43,36,37,55], rivals: [1,27,28,39,49] },
+  43: { patrons: [], proxies: [], coalition: [41,42,36,37,55], rivals: [1,27,28,39,49] },
+  36: { patrons: [], proxies: [], coalition: [41,42,43,37], rivals: [] },
+  // AIPAC / Evangelical — pro-Israel lobby bloc
+  39: { patrons: [], proxies: [], coalition: [49,2,30,31,32,1,27], rivals: [33,40,41,42,43] },
+  49: { patrons: [], proxies: [], coalition: [39,2,30,1,27], rivals: [33,40,41,42,43] },
+  40: { patrons: [], proxies: [], coalition: [33,55,36], rivals: [39,49,30,31,32] },
+};
+
+
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const CLIENT_VERSION = '1.0.0';
+const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
+const DAILY_LIMIT = 10;
+const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
+
+// ─────────────────────────────────────────────
+// DEVICE ID — anonymous persistent identifier
+// ─────────────────────────────────────────────
+function getDeviceId() {
+  let id = localStorage.getItem('wbt_device_id');
+  if (!id) {
+    id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+    localStorage.setItem('wbt_device_id', id);
+  }
+  return id;
+}
+
+// ─────────────────────────────────────────────
+// RATE LIMITING
+// ─────────────────────────────────────────────
+function getRateData() {
+  try {
+    const d = JSON.parse(localStorage.getItem('wbt_rate') || '{}');
+    const today = new Date().toDateString();
+    if (d.date !== today) return { date: today, count: 0 };
+    return d;
+  } catch(e) { return { date: new Date().toDateString(), count: 0 }; }
+}
+function saveRateData(d) { localStorage.setItem('wbt_rate', JSON.stringify(d)); }
+function getRemainingScans() { return Math.max(0, DAILY_LIMIT - getRateData().count); }
+function incrementScanCount() {
+  const d = getRateData();
+  d.count = (d.count || 0) + 1;
+  saveRateData(d);
+  updateSidebar();
+}
+function isRateLimited() { return getRateData().count >= DAILY_LIMIT; }
+
+// ─────────────────────────────────────────────
+// STORAGE
+// ─────────────────────────────────────────────
+function getHistory() { try { return JSON.parse(localStorage.getItem('wbt_client_history') || '[]'); } catch(e) { return []; } }
+function saveHistory(h) { localStorage.setItem('wbt_client_history', JSON.stringify(h)); }
+function getActors() { try { return JSON.parse(localStorage.getItem('wbt_client_actors') || '{}'); } catch(e) { return {}; } }
+function saveActors(a) { localStorage.setItem('wbt_client_actors', JSON.stringify(a)); }
+function getTotalScans() { return getHistory().filter(function(e){ return !e.failed; }).length; }
+
+// ─────────────────────────────────────────────
+// SIDEBAR
+// ─────────────────────────────────────────────
+function updateSidebar() {
+  const rate = getRateData();
+  const used = rate.count || 0;
+  const remaining = Math.max(0, DAILY_LIMIT - used);
+  const pct = (used / DAILY_LIMIT) * 100;
+  document.getElementById('scans-today').textContent = used;
+  document.getElementById('scans-remaining').textContent = remaining;
+  document.getElementById('scans-total').textContent = getTotalScans();
+  document.getElementById('rate-fill').style.width = pct + '%';
+  document.getElementById('rate-text-left').textContent = used + ' of ' + DAILY_LIMIT + ' used';
+}
+
+// ─────────────────────────────────────────────
+// NAV
+// ─────────────────────────────────────────────
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('page-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'history') renderHistory();
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+function showError(msg) {
+  const b = document.getElementById('error-banner');
+  document.getElementById('error-text').textContent = msg;
+  b.style.display = 'block';
+}
+function hideError() { document.getElementById('error-banner').style.display = 'none'; }
+function delay(ms) { return new Promise(function(r){ setTimeout(r, ms); }); }
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function detectPlatform(url) {
+  if (/x\.com|twitter\.com/i.test(url)) return 'x';
+  if (/instagram\.com/i.test(url)) return 'instagram';
+  if (/facebook\.com|fb\.com/i.test(url)) return 'facebook';
+  return 'unknown';
+}
+function alignmentColor(pct) {
+  if (pct >= 81) return '#e8603c';
+  if (pct >= 61) return '#e8a23c';
+  if (pct >= 31) return '#7b6fe8';
+  return '#4a7abf';
+}
+function actorKey(handle) { return (handle||'').toLowerCase().replace(/[@\s]/g,''); }
+function extractHandle(url, post) {
+  const manual = (document.getElementById('manual-actor-handle').value||'').trim().replace('@','');
+  if (manual) return manual;
+  let m = url.match(/(?:x\.com|twitter\.com)\/([^\/\?]+)/i);
+  if (m && m[1] && !['i','home','search','explore'].includes(m[1])) return m[1];
+  if (post && post.authorHandle) return post.authorHandle;
+  if (post && post.author) return post.author;
+  return null;
+}
+function generateScanId(srvVer) {
+  const now = new Date();
+  const date = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  const av = CLIENT_VERSION.replace(/\./g,'');
+  const sv = (srvVer||'?').replace(/\./g,'');
+  const random = Math.random().toString(36).substring(2,6).toUpperCase();
+  return 'WBT-' + date + '-' + av + '-' + sv + '-' + random;
+}
+
+// ─────────────────────────────────────────────
+// URL CHANGE
+// ─────────────────────────────────────────────
+function onUrlChange() {
+  const url = document.getElementById('url-input').value.trim();
+  const isIG = /instagram\.com|facebook\.com|fb\.com/i.test(url);
+  document.getElementById('actor-handle-row').style.display = isIG ? 'block' : 'none';
+  hideError();
+  document.getElementById('manual-fallback').style.display = 'none';
+}
+
+// ─────────────────────────────────────────────
+// ANALYZE
+// ─────────────────────────────────────────────
+const LOAD_STEPS = [
+  'Fetching post content...',
+  'Running AI text detection...',
+  'Analyzing image...',
+  'Scoring narrative against entity database...',
+  'Running account background check...',
+  'Compiling results...'
+];
+
+let currentResult = null;
+let pendingActorHandle = null;
+let pendingActorUrl = null;
+
+function resetAnalysis() {
+  hideError();
+  document.getElementById('loader').classList.remove('active');
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('url-input').value = '';
+  document.getElementById('manual-actor-handle').value = '';
+  document.getElementById('actor-handle-row').style.display = 'none';
+  document.getElementById('post-text').value = '';
+  document.getElementById('manual-fallback').style.display = 'none';
+  document.getElementById('actor-prompt').style.display = 'none';
+  document.getElementById('actor-result-card').style.display = 'none';
+  document.getElementById('account-info').style.display = 'block';
+  document.getElementById('convergent-card').style.display = 'none';
+}
+
+function showLoader() {
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('loader').classList.add('active');
+  document.getElementById('loader-steps').innerHTML = LOAD_STEPS.map(function(s,i){
+    return '<div class="loader-step' + (i===0?' active':'') + '">' + s + '</div>';
+  }).join('');
+}
+
+async function startAnalysis() {
+  const url = document.getElementById('url-input').value.trim();
+  if (!url) { toast('Please enter a URL.'); return; }
+  if (isRateLimited()) { showRateLimitMessage(); return; }
+  hideError();
+  showLoader();
+  try {
+    await performServerAnalysis(url);
+  } catch(e) {
+    document.getElementById('loader').classList.remove('active');
+    document.getElementById('manual-fallback').style.display = 'block';
+    showError(e.message);
+    saveFailedScan(url, e.message);
+  }
+}
+
+async function analyzeWithManualText() {
+  const url = document.getElementById('url-input').value.trim();
+  const postText = document.getElementById('post-text').value.trim();
+  if (!postText) { toast('Please paste the post text first.'); return; }
+  if (isRateLimited()) { showRateLimitMessage(); return; }
+  hideError();
+  showLoader();
+  document.getElementById('manual-fallback').style.display = 'none';
+  try {
+    const entities = DEFAULT_ENTITIES;
+    const steps = document.getElementById('loader-steps').querySelectorAll('.loader-step');
+    const adv = function(i){ if(steps[i]){steps[i].classList.remove('active');steps[i].classList.add('done');steps[i].textContent='✓ '+LOAD_STEPS[i];} if(steps[i+1])steps[i+1].classList.add('active'); };
+    adv(0); await delay(300); adv(1); await delay(300); adv(2);
+    const res = await fetch(SERVER_URL + '/analyze', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ url, postText, entities, deviceId: getDeviceId() })
+    });
+    if (!res.ok) { const e = await res.json().catch(function(){return {};}); throw new Error(e.error || 'Server error ' + res.status); }
+    const analysis = await res.json();
+    adv(3); await delay(300); adv(4); await delay(300); adv(5); await delay(200);
+    const result = buildResult(analysis, {text: postText}, entities);
+    showResults(url, result);
+    await saveToHistory(url, postText, result, null);
+    incrementScanCount();
+  } catch(e) {
+    document.getElementById('loader').classList.remove('active');
+    document.getElementById('manual-fallback').style.display = 'block';
+    showError(e.message);
+    saveFailedScan(url, e.message);
+  }
+}
+
+async function performServerAnalysis(url) {
+  const entities = DEFAULT_ENTITIES;
+  const steps = document.getElementById('loader-steps').querySelectorAll('.loader-step');
+  const adv = function(i){ if(steps[i]){steps[i].classList.remove('active');steps[i].classList.add('done');steps[i].textContent='✓ '+LOAD_STEPS[i];} if(steps[i+1])steps[i+1].classList.add('active'); };
+  adv(0);
+  const res = await fetch(SERVER_URL + '/fetch-and-analyze', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ url, entities, deviceId: getDeviceId() })
+  });
+  if (!res.ok) { const e = await res.json().catch(function(){return {};}); throw new Error(e.error || 'Server error ' + res.status); }
+  adv(1); await delay(250); adv(2); await delay(250); adv(3); await delay(250); adv(4); await delay(250); adv(5); await delay(200);
+  const data = await res.json();
+  const result = buildResult(data.analysis, data.post, entities);
+  showResults(url, result);
+  await saveToHistory(url, (data.post&&data.post.text)||'', result, null).catch(function(e){ console.warn('History save error:', e.message); });
+  incrementScanCount();
+}
+
+function buildResult(analysis, post, entities) {
+  const rawMatches = (analysis.matches||[]).map(function(m){
+    return Object.assign({},m,{
+      pct: (typeof m.pct==='number'&&!isNaN(m.pct)) ? m.pct : Math.round(((m.interest||0)*.55)+((m.mo||0)*.35)+((m.narrative||0)*.10)),
+      secondary: m.alignment==='secondary'
+    });
+  }).sort(function(a,b){return b.pct-a.pct;});
+  const above = rawMatches.filter(function(m){return m.pct>=85;});
+  const primary = above.filter(function(m){return !m.secondary;}).slice(0,3);
+  const secondary = above.filter(function(m){return m.secondary;}).slice(0,2);
+  const matches = primary.concat(secondary);
+  const topPrimary = primary[0]||null;
+  const topMatch = topPrimary ? topPrimary.pct : 0;
+  const topName = topPrimary ? topPrimary.name : null;
+  const topNames = primary.slice(0,2).map(function(m){return m.name;}).join(' / ');
+  return {
+    post: post,
+    textAI: analysis.text_ai_score||5, textNote: analysis.text_ai_reason||'',
+    hasImage: false, imgNote: 'Image analysis coming in a future version.',
+    matches: matches,
+    overall: {
+      score: topMatch,
+      label: topNames||'No strong alignment detected',
+      desc: matches.length>0
+        ? 'Claude AI found '+primary.length+' primary and '+secondary.length+' secondary alignment'+(secondary.length!==1?'s':'')+' above 85% across '+entities.length+' entities. Strongest: '+(topName||'—')+' at '+topMatch+'%.'
+        : 'Claude AI found no entity alignment above 85% across '+entities.length+' entities.'
+    }
+  };
+}
+
+function showResults(url, d) {
+  document.getElementById('loader').classList.remove('active');
+  document.getElementById('results').classList.add('active');
+  document.getElementById('results').classList.add('active');
+  document.getElementById('result-url').textContent = url;
+  currentResult = Object.assign({url:url}, d);
+
+  // Dial
+  const pct = d.overall.score||0;
+  const color = alignmentColor(pct);
+  const circle = document.getElementById('dial-circle');
+  circle.style.strokeDashoffset = 150.8 - (150.8 * pct / 100);
+  circle.style.stroke = pct > 0 ? color : 'var(--blue-mid)';
+  document.getElementById('dial-num').textContent = pct + '%';
+  document.getElementById('dial-num').style.color = pct > 0 ? color : 'var(--text3)';
+  document.getElementById('overall-label').textContent = d.overall.label;
+  document.getElementById('overall-desc').textContent = d.overall.desc;
+
+  // Text AI
+  const tPct = d.textAI * 10;
+  document.getElementById('text-bar').style.width = tPct + '%';
+  document.getElementById('text-bar').style.background = alignmentColor(tPct);
+  document.getElementById('text-val').textContent = d.textAI + '/10';
+  document.getElementById('text-val').style.color = alignmentColor(tPct);
+  document.getElementById('text-note').textContent = d.textNote;
+
+  // Matches
+  const primaryEl = document.getElementById('primary-matches');
+  const secondaryEl = document.getElementById('secondary-matches');
+  const primary = (d.matches||[]).filter(function(m){return !m.secondary;});
+  const secondary = (d.matches||[]).filter(function(m){return m.secondary;});
+
+  function renderMatch(m, isSec) {
+    const c = alignmentColor(m.pct);
+    return '<div class="match-item ' + (isSec?'secondary':'primary') + '">' +
+      '<div class="match-top">' +
+        '<span class="match-name">' + escHtml(m.name) + '</span>' +
+        '<span class="match-tag' + (isSec?' sec':'') + '">' + (isSec?'secondary':'primary') + '</span>' +
+        '<span class="match-pct' + (isSec?' sec':'') + '" style="color:' + (isSec?'var(--text3)':c) + '">' + m.pct + '%</span>' +
+      '</div>' +
+      '<div style="margin-bottom:6px">' +
+        [['Public narrative (10%)',m.narrative],['Hidden interest (55%)',m.interest],['Modus operandi (35%)',m.mo]].map(function(p){
+          return '<div class="mini-bar-row"><span class="mini-label">'+p[0]+'</span><div class="mini-wrap"><div class="mini-fill" style="width:'+p[1]+'%;background:'+alignmentColor(p[1])+'"></div></div><span class="mini-val">'+p[1]+'%</span></div>';
+        }).join('') +
+      '</div>' +
+      '<div class="match-why">' + escHtml(m.why||'') + '</div>' +
+      (m.missing ? '<div class="missing-box" style="border-left-color:'+c+'"><div class="missing-label" style="color:'+c+'">What this post leaves out</div><div class="missing-text">' + escHtml(m.missing) + '</div></div>' : '') +
+    '</div>';
+  }
+
+  if (primary.length===0 && secondary.length===0) {
+    primaryEl.innerHTML = '<div class="no-alignment">No entity alignment above 85% detected.</div>';
+    secondaryEl.innerHTML = '';
+  } else {
+    primaryEl.innerHTML = primary.length>0
+      ? '<div class="section-label">Primary alignment</div>' + primary.map(function(m){return renderMatch(m,false);}).join('')
+      : '<div class="no-alignment">No primary alignment found.</div>';
+    secondaryEl.innerHTML = secondary.length>0
+      ? '<div class="section-label" style="margin-top:10px">Secondary alignment</div>' + secondary.map(function(m){return renderMatch(m,true);}).join('')
+      : '';
+  }
+
+  // Actor
+  document.getElementById('account-info').style.display = 'none';
+  document.getElementById('actor-prompt').style.display = 'none';
+  document.getElementById('actor-result-card').style.display = 'none';
+  const handle = extractHandle(url, d.post);
+  if (handle) {
+    const actors = getActors();
+    const key = actorKey(handle);
+    if (actors[key]) {
+      document.getElementById('actor-result-card').style.display = 'block';
+      renderActorCard(document.getElementById('actor-result-body'), actors[key]);
+    } else {
+      pendingActorHandle = handle;
+      pendingActorUrl = url;
+      document.getElementById('actor-prompt-text').textContent = 'Account "@' + handle + '" hasn\'t been profiled yet. Research this actor?';
+      document.getElementById('actor-prompt').style.display = 'block';
+    }
+  } else {
+    document.getElementById('account-info').style.display = 'block';
+    document.getElementById('account-info').textContent = 'No account handle detected from URL.';
+  }
+
+  // Convergent interest (async, non-blocking)
+  document.getElementById('convergent-card').style.display = 'none';
+  const primaryMatches = (d.matches||[]).filter(function(m){return !m.secondary;});
+  const postText = d.post && d.post.text ? d.post.text : '';
+  if (primaryMatches.length > 0 && postText) {
+    checkConvergentInterest(postText, primaryMatches);
+  }
+}
+
+async function checkConvergentInterest(postText, primaryMatches) {
+  try {
+    const res = await fetch(SERVER_URL + '/convergent-interest', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ postText, primaryMatches, allEntities: DEFAULT_ENTITIES })
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const c = data.convergent;
+    if (!c||!c.found) return;
+    document.getElementById('conv-entities').innerHTML = escHtml(c.entityA.name) + ' &nbsp;+&nbsp; ' + escHtml(c.entityB.name);
+    document.getElementById('conv-outcome').textContent = c.sharedOutcome;
+    document.getElementById('conv-explanation').textContent = c.explanation;
+    document.getElementById('conv-rival-tag').innerHTML = c.isRivals ? '<span class="conv-rivals">normally rivals</span>' : '';
+    document.getElementById('convergent-card').style.display = 'block';
+  } catch(e) { console.warn('Convergent interest check failed:', e.message); }
+}
+
+// ─────────────────────────────────────────────
+// RATE LIMIT MESSAGE
+// ─────────────────────────────────────────────
+function showRateLimitMessage() {
+  document.getElementById('loader').classList.remove('active');
+  document.getElementById('results').classList.remove('active');
+  const main = document.querySelector('#page-analyze .main');
+  const existing = document.getElementById('rate-limit-msg');
+  if (existing) return;
+  const div = document.createElement('div');
+  div.id = 'rate-limit-msg';
+  div.className = 'rate-limit-banner';
+  div.innerHTML = '<h3>Daily limit reached</h3><p>You\'ve used all 10 scans for today. Credits reset at midnight.<br>Need more scans? <a href="mailto:' + CONTACT_EMAIL + '">Contact us</a>.</p>';
+  main.appendChild(div);
+}
+
+// ─────────────────────────────────────────────
+// ACTOR RESEARCH
+// ─────────────────────────────────────────────
+function dismissActorPrompt() {
+  document.getElementById('actor-prompt').style.display = 'none';
+  document.getElementById('account-info').style.display = 'block';
+  document.getElementById('account-info').textContent = 'Actor research skipped.';
+  pendingActorHandle = null;
+}
+
+async function researchActor() {
+  if (!pendingActorHandle) return;
+  const handle = pendingActorHandle;
+  document.getElementById('actor-prompt').style.display = 'none';
+  document.getElementById('actor-result-card').style.display = 'block';
+  const body = document.getElementById('actor-result-body');
+  body.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0;font-weight:500">Researching actor...</div>';
+  try {
+    const res = await fetch(SERVER_URL + '/research-actor', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ handle, url: pendingActorUrl })
+    });
+    if (!res.ok) throw new Error('Server error');
+    const data = await res.json();
+    const actors = getActors();
+    actors[actorKey(handle)] = Object.assign({}, data.actor, { handle, ts: new Date().toISOString() });
+    saveActors(actors);
+    renderActorCard(body, data.actor);
+    toast('Actor profile saved.');
+  } catch(e) {
+    body.innerHTML = '<div style="font-size:12px;color:var(--red);font-weight:500">Could not research actor: ' + escHtml(e.message) + '</div>';
+  }
+  pendingActorHandle = null;
+}
+
+function renderActorCard(container, actor) {
+  container.innerHTML =
+    '<div style="margin-bottom:6px">' +
+      '<div class="actor-name">' + escHtml(actor.name||actor.handle||'Unknown') + '</div>' +
+      (actor.location ? '<div class="actor-location">📍 ' + escHtml(actor.location) + '</div>' : '') +
+    '</div>' +
+    '<div class="actor-bio">' + escHtml(actor.bio||'No biographical information found.') + '</div>' +
+    (actor.handles&&actor.handles.length>0
+      ? '<div class="actor-handles">' + actor.handles.map(function(h){ return '<span class="actor-handle-tag">' + escHtml(h) + '</span>'; }).join('') + '</div>'
+      : '');
+}
+
+// ─────────────────────────────────────────────
+// HISTORY
+// ─────────────────────────────────────────────
+let _cachedSrvVersion = null;
+async function fetchSrvVersion() {
+  if (_cachedSrvVersion) return _cachedSrvVersion;
+  try {
+    const r = await fetch(SERVER_URL + '/');
+    const d = await r.json();
+    _cachedSrvVersion = d.version || '?';
+    return _cachedSrvVersion;
+  } catch(e) { return '?'; }
+}
+
+async function saveToHistory(url, postText, result, srvVer) {
+  const sv = srvVer || await fetchSrvVersion().catch(function(){ return '?'; });
+  const scanId = generateScanId(sv);
+  const platform = detectPlatform(url);
+  const now = new Date();
+  const entry = {
+    id: now.getTime(),
+    scanId, ts: now.toISOString(),
+    url, platform,
+    postText: (postText||'').slice(0,500),
+    overallScore: result.overall.score,
+    overallLabel: result.overall.label,
+    topMatches: (result.matches||[]).slice(0,3).map(function(m){return m.name;}),
+    textAI: result.textAI,
+    appVersion: CLIENT_VERSION,
+    serverVersion: sv,
+    comment: '',
+    fullResult: result
+  };
+  const h = getHistory().filter(function(e){
+    const tsMin = e.ts ? e.ts.slice(0,16) : '';
+    return e.scanId !== scanId && !(e.url === url && tsMin === now.toISOString().slice(0,16));
+  });
+  h.unshift(entry);
+  if (h.length > 200) h.splice(200);
+  saveHistory(h);
+}
+
+async function saveFailedScan(url, errorMsg) {
+  const sv = await fetchSrvVersion().catch(function(){ return '?'; });
+  const scanId = generateScanId(sv);
+  const entry = {
+    id: Date.now(), scanId,
+    ts: new Date().toISOString(),
+    url, platform: detectPlatform(url),
+    postText: '', overallScore: 0, overallLabel: 'Failed',
+    topMatches: [], textAI: 0,
+    appVersion: CLIENT_VERSION, serverVersion: sv,
+    comment: '', failed: true, errorMsg,
+    fullResult: null
+  };
+  const h = getHistory();
+  h.unshift(entry);
+  if (h.length > 200) h.splice(200);
+  saveHistory(h);
+}
+
+async function saveComment(scanId, comment) {
+  const h = getHistory();
+  const entry = h.find(function(e){ return e.scanId === scanId || String(e.id) === String(scanId); });
+  if (entry) { entry.comment = comment; saveHistory(h); }
+}
+
+function openHistoryEntry(id) {
+  const h = getHistory();
+  const entry = h.find(function(e){ return e.id === id; });
+  if (!entry || !entry.fullResult) { toast('Full result not available.'); return; }
+  showPage('analyze', document.getElementById('nav-analyze'));
+  document.getElementById('url-input').value = entry.url;
+  document.getElementById('manual-fallback').style.display = 'none';
+  showResults(entry.url, entry.fullResult);
+}
+
+function renderHistory() {
+  const h = getHistory();
+  const list = document.getElementById('history-list');
+  if (h.length === 0) {
+    list.innerHTML = '<div class="no-history">No scans yet. Analyze a post to see it here.</div>';
+    return;
+  }
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', unknown:'🔗'};
+  list.innerHTML = h.map(function(e) {
+    const d = new Date(e.ts);
+    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const scanId = e.scanId || ('WBT-legacy-' + e.id);
+    const icon = platformIcon[e.platform||'unknown']||'🔗';
+    if (e.failed) {
+      return '<div class="history-item" style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.03)">' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">' +
+          '<span>' + icon + '</span>' +
+          '<span class="scan-id">' + escHtml(scanId) + '</span>' +
+          '<span style="font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-left:4px">Failed</span>' +
+        '</div>' +
+        '<div class="history-url">' + escHtml(e.url) + '</div>' +
+        '<div class="history-time">' + dateStr + '</div>' +
+        '<div style="font-size:11px;color:var(--red);margin-top:6px;line-height:1.5;user-select:text">⚠ ' + escHtml(e.errorMsg||'Unknown error') + '</div>' +
+        '<textarea class="comment-field" placeholder="Add a note..." onclick="event.stopPropagation()" onchange="saveComment(\'' + escHtml(scanId) + '\',this.value)">' + escHtml(e.comment||'') + '</textarea>' +
+      '</div>';
+    }
+    const color = alignmentColor(e.overallScore);
+    const hasResult = !!e.fullResult;
+    return '<div class="history-item">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">' +
+        '<div style="display:flex;align-items:center;gap:6px">' +
+          '<span>' + icon + '</span>' +
+          '<span class="scan-id">' + escHtml(scanId) + '</span>' +
+        '</div>' +
+        '<span class="scan-version">' + escHtml(e.appVersion||'?') + ' / srv ' + escHtml(e.serverVersion||'?') + '</span>' +
+      '</div>' +
+      '<div style="cursor:pointer" onclick="openHistoryEntry(' + e.id + ')">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+          '<span class="history-url">' + escHtml(e.url) + '</span>' +
+          '<span class="history-score" style="color:' + color + ';flex-shrink:0">' + e.overallScore + '%</span>' +
+        '</div>' +
+        '<div class="history-time">' + dateStr + '</div>' +
+        (e.postText ? '<div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5;font-weight:500">"' + escHtml(e.postText.slice(0,140)) + (e.postText.length>140?'…':'') + '"</div>' : '') +
+        '<div class="history-tags" style="margin-top:6px">' +
+          '<span class="history-tag" style="color:' + color + ';border-color:' + color + '33">' + escHtml(e.overallLabel) + '</span>' +
+          (e.topMatches||[]).map(function(m){ return '<span class="history-tag">' + escHtml(m) + '</span>'; }).join('') +
+          (hasResult ? '<span class="history-tag" style="margin-left:auto;color:var(--text3)">view →</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<textarea class="comment-field" placeholder="Add a note..." onclick="event.stopPropagation()" onchange="saveComment(\'' + escHtml(scanId) + '\',this.value)">' + escHtml(e.comment||'') + '</textarea>' +
+    '</div>';
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// STATUS BAR
+// ─────────────────────────────────────────────
+function initStatusBar() {
+  document.getElementById('app-ver-label').textContent = 'app v' + CLIENT_VERSION;
+  fetch(SERVER_URL + '/')
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      document.getElementById('status-dot').className = 'status-dot';
+      document.getElementById('status-text').textContent = 'Server online';
+      document.getElementById('srv-ver-label').textContent = 'srv v' + (d.version||'?');
+      _cachedSrvVersion = d.version || '?';
+    })
+    .catch(function(){
+      document.getElementById('status-dot').className = 'status-dot offline';
+      document.getElementById('status-text').textContent = 'Server offline';
+    });
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  getDeviceId(); // ensure device ID exists
+  updateSidebar();
+  initStatusBar();
+  // Set contact email
+  const emailEl = document.getElementById('contact-email');
+  if (emailEl) { emailEl.href = 'mailto:' + CONTACT_EMAIL; emailEl.textContent = CONTACT_EMAIL; }
+});
+
+</script>
+</body>
+</html>
