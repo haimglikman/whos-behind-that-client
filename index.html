@@ -547,7 +547,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.0.0';
+const CLIENT_VERSION = '1.0.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
@@ -1011,6 +1011,8 @@ async function saveToHistory(url, postText, result, srvVer) {
     id: now.getTime(),
     scanId, ts: now.toISOString(),
     url, platform,
+    source: 'client',
+    deviceId: getDeviceId(),
     postText: (postText||'').slice(0,500),
     overallScore: result.overall.score,
     overallLabel: result.overall.label,
@@ -1028,6 +1030,12 @@ async function saveToHistory(url, postText, result, srvVer) {
   h.unshift(entry);
   if (h.length > 200) h.splice(200);
   saveHistory(h);
+  // Save to shared server DB
+  fetch(SERVER_URL + '/history/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entry)
+  }).catch(function(e){ console.warn('Server history save failed:', e.message); });
 }
 
 async function saveFailedScan(url, errorMsg) {
