@@ -1,5 +1,12 @@
 # whos-behind-that-client
 
+### v1.11.0 (server) | Admin v2.0.0 / Client v1.0.1
+- source and device_id columns added to scans table
+- history/save accepts and stores source + deviceId
+- history/list supports source and deviceId filter params
+- Device IDs hashed to usr_XXXX for privacy
+- clientUsers array returned for admin filter dropdown
+
 ## v1.0.0
 **Server: v1.10.4**
 - Initial client release
