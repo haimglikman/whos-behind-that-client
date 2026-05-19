@@ -1,6 +1,7 @@
 # whos-behind-that-client
 
 ### v1.0.1 (client)
+**Server: v1.10.4**
 - Client scans now saved to shared database — visible in admin history
 - Scans tagged with source:'client' and anonymous device ID
 
