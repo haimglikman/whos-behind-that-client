@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.1.1 — bug fix (client) | Server: v1.11.0 | Admin: v2.1.1
+- Fixed dial percentage appearing top-left on mobile — now properly centered
+- History entries now open inline as an overlay within My history tab instead of switching to Analyze tab
+- Analyze tab auto-clears after a successful scan and shows a toast with the scan ID pointing to My history
+
 ### v1.1.0 (client) | Server: v1.11.0 | Admin: v2.1.1
 - Mobile: sidebar hidden on small screens, replaced with bottom tab bar (Analyze / History / About)
 - Fixed actor research prompt incorrectly showing Instagram/Facebook detection message for all platforms — now shows a generic "Would you like to research this account?" prompt
