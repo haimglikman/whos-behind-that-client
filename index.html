@@ -106,7 +106,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 
 .dial-row{display:flex;align-items:center;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bg)}
 .dial{position:relative;width:60px;height:60px;flex-shrink:0}
-.dial-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--blue)}
+.dial-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:700;color:var(--blue);white-space:nowrap}
 .overall-label{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
 .overall-desc{font-size:11px;color:var(--text3);line-height:1.55;font-weight:500}
 
@@ -231,7 +231,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   .filter-grid{grid-template-columns:1fr 1fr}
   .score-row{gap:10px}
   .dial{width:48px;height:48px}
-  .dial-num{font-size:12px}
+  .dial-num{font-size:12px;transform:translate(-50%,-50%)}
   .match-item{padding:9px 11px}
   .mini-label{width:100px;font-size:9px}
   .history-item{padding:11px 13px}
@@ -577,7 +577,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.1.0';
+const CLIENT_VERSION = '1.1.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
@@ -658,6 +658,12 @@ function toast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+function toastLong(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 5000);
 }
 function showError(msg) {
   const b = document.getElementById('error-banner');
@@ -780,15 +786,26 @@ async function analyzeWithManualText() {
     const analysis = await res.json();
     adv(3); await delay(300); adv(4); await delay(300); adv(5); await delay(200);
     const result = buildResult(analysis, {text: postText}, entities);
-    showResults(url, result);
-    await saveToHistory(url, postText, result, null);
+    const entry = await saveToHistory(url, postText, result, null);
     incrementScanCount();
+    finishAnalysis(entry);
   } catch(e) {
     document.getElementById('loader').classList.remove('active');
     document.getElementById('manual-fallback').style.display = 'block';
     showError(e.message);
     saveFailedScan(url, e.message);
   }
+}
+
+function finishAnalysis(entry) {
+  // Clear analyze tab
+  document.getElementById('loader').classList.remove('active');
+  document.getElementById('url-input').value = '';
+  document.getElementById('manual-fallback').style.display = 'none';
+  document.getElementById('post-text').value = '';
+  // Show toast pointing to history
+  const scanId = entry ? entry.scanId : '';
+  toastLong('Analysis saved to My history' + (scanId ? ' — ' + scanId : ''));
 }
 
 async function performServerAnalysis(url) {
@@ -804,9 +821,9 @@ async function performServerAnalysis(url) {
   adv(1); await delay(250); adv(2); await delay(250); adv(3); await delay(250); adv(4); await delay(250); adv(5); await delay(200);
   const data = await res.json();
   const result = buildResult(data.analysis, data.post, entities);
-  showResults(url, result);
-  await saveToHistory(url, (data.post&&data.post.text)||'', result, null).catch(function(e){ console.warn('History save error:', e.message); });
+  const entry = await saveToHistory(url, (data.post&&data.post.text)||'', result, null).catch(function(e){ console.warn('History save error:', e.message); });
   incrementScanCount();
+  finishAnalysis(entry);
 }
 
 function buildResult(analysis, post, entities) {
@@ -1061,6 +1078,7 @@ async function saveToHistory(url, postText, result, srvVer) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(entry)
   }).catch(function(e){ console.warn('Server history save failed:', e.message); });
+  return entry;
 }
 
 async function saveFailedScan(url, errorMsg) {
@@ -1091,11 +1109,58 @@ async function saveComment(scanId, comment) {
 function openHistoryEntry(id) {
   const h = getHistory();
   const entry = h.find(function(e){ return e.id === id; });
-  if (!entry || !entry.fullResult) { toast('Full result not available.'); return; }
-  showPage('analyze', document.getElementById('nav-analyze'));
-  document.getElementById('url-input').value = entry.url;
-  document.getElementById('manual-fallback').style.display = 'none';
-  showResults(entry.url, entry.fullResult);
+  if (!entry || !entry.fullResult) { toast('Full result not available for this scan.'); return; }
+  // Show inline in history tab — don't switch pages
+  const existing = document.getElementById('history-inline-result');
+  if (existing) existing.remove();
+  const wrap = document.createElement('div');
+  wrap.id = 'history-inline-result';
+  wrap.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:50;overflow:auto;padding-bottom:70px';
+  wrap.innerHTML =
+    '<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1">' +
+      '<button onclick="document.getElementById(\'history-inline-result\').remove()" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);color:var(--text2)">← Back</button>' +
+      '<span style="font-size:11px;color:var(--text3);font-family:var(--mono)">' + escHtml(entry.scanId||'') + '</span>' +
+    '</div>' +
+    '<div style="padding:16px"></div>';
+  document.body.appendChild(wrap);
+  // Render result into the overlay
+  const resultArea = wrap.querySelector('div:last-child');
+  renderResultInto(resultArea, entry.url, entry.fullResult);
+}
+
+function renderResultInto(container, url, d) {
+  const pct = d.overall.score || 0;
+  const color = alignmentColor(pct);
+  const circ = 150.8;
+  const offset = circ - (circ * pct / 100);
+  const primary = (d.matches||[]).filter(function(m){return !m.secondary;});
+  const secondary = (d.matches||[]).filter(function(m){return m.secondary;});
+
+  function renderMatch(m, isSec) {
+    const c = alignmentColor(m.pct);
+    return '<div class="match-item ' + (isSec?'secondary':'primary') + '" style="border-left-color:' + (isSec?'var(--blue-mid)':c) + '">' +
+      '<div class="match-top">' +
+        '<span class="match-name">' + escHtml(m.name) + '</span>' +
+        '<span class="match-tag' + (isSec?' sec':'') + '">' + (isSec?'secondary':'primary') + '</span>' +
+        '<span class="match-pct" style="color:' + (isSec?'var(--text3)':c) + '">' + m.pct + '%</span>' +
+      '</div>' +
+      '<div class="match-why">' + escHtml(m.why||'') + '</div>' +
+    '</div>';
+  }
+
+  container.innerHTML =
+    '<div style="font-family:var(--mono);font-size:11px;color:var(--text3);word-break:break-all;margin-bottom:12px">' + escHtml(url) + '</div>' +
+    '<div class="card" style="margin-bottom:12px">' +
+      '<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">' +
+        '<div class="dial">' +
+          '<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="var(--blue-mid)" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="' + color + '" stroke-width="5" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" stroke-linecap="round" transform="rotate(-90 30 30)"/></svg>' +
+          '<div class="dial-num" style="color:' + (pct>0?color:'var(--text3)') + '">' + pct + '%</div>' +
+        '</div>' +
+        '<div><div class="score-title">' + escHtml(d.overall.label) + '</div><div class="score-sub">' + escHtml(d.overall.desc||'') + '</div></div>' +
+      '</div>' +
+      (primary.length>0 ? '<div class="section-label">Primary alignment</div>' + primary.map(function(m){return renderMatch(m,false);}).join('') : '<div class="no-alignment">No primary alignment detected.</div>') +
+      (secondary.length>0 ? '<div class="section-label" style="margin-top:10px">Secondary alignment</div>' + secondary.map(function(m){return renderMatch(m,true);}).join('') : '') +
+    '</div>';
 }
 
 function renderHistory() {
