@@ -1,5 +1,15 @@
 # whos-behind-that-client
 
+### v1.1.3 — bug fix (client) | Server: v1.11.0 | Admin: v2.1.1
+- Fixed dial percentage position on mobile — explicit SVG dimensions prevent layout collapse
+- Versions (app + server) now shown in top-right corner on mobile since bottom bar is hidden behind tab bar
+- Bottom bar hidden on mobile to avoid overlap with tab bar
+
+### v1.1.2 — bug fix (client) | Server: v1.11.0 | Admin: v2.1.1
+- Fixed dial percentage centering on mobile — reverted to flex centering which is reliable across browsers
+- Analyze tab no longer clears immediately after scan — results stay visible, tab clears when navigating away
+- Cleaned up stale references to removed actor handle input
+
 ### v1.1.1 — bug fix (client) | Server: v1.11.0 | Admin: v2.1.1
 - Fixed dial percentage appearing top-left on mobile — now properly centered
 - History entries now open inline as an overlay within My history tab instead of switching to Analyze tab
