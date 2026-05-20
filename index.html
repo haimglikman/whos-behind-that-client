@@ -30,6 +30,8 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 .brand-name{font-size:14px;font-weight:700;color:#fff}
 .brand-badge{font-size:9px;color:#4a8aff;background:rgba(74,138,255,.15);border:1px solid rgba(74,138,255,.25);border-radius:99px;padding:2px 9px;font-weight:700;letter-spacing:.04em}
 .topbar-right{font-size:11px;color:#4a6a9a;font-weight:600}
+.topbar-mobile-only{display:none}
+.topbar-desktop-only{display:inline}
 
 /* ── NAV ── */
 .nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;flex-shrink:0}
@@ -105,8 +107,9 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 .result-url{font-size:11px;color:var(--text3);font-family:var(--mono);font-weight:500;word-break:break-all;margin-bottom:2px}
 
 .dial-row{display:flex;align-items:center;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bg)}
-.dial{position:relative;width:60px;height:60px;flex-shrink:0}
-.dial-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;font-weight:700;color:var(--blue);white-space:nowrap}
+.dial{position:relative;width:60px;height:60px;flex-shrink:0;display:block}
+.dial svg{display:block;width:60px;height:60px}
+.dial-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--blue);line-height:1}
 .overall-label{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
 .overall-desc{font-size:11px;color:var(--text3);line-height:1.55;font-weight:500}
 
@@ -210,6 +213,10 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 @media (max-width:640px) {
   .sidebar{display:none}
   .shell{padding-bottom:60px}
+  .bottombar{display:none}
+  .topbar-mobile-only{display:block}
+  .topbar-desktop-only{display:none}
+  .topbar-right{display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-size:9px;color:#4a6a9a}
   .mobile-tabs{
     display:flex;position:fixed;bottom:0;left:0;right:0;
     background:var(--surface);border-top:1px solid var(--border);
@@ -224,14 +231,13 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   }
   .mobile-tab.active{color:var(--blue)}
   .mobile-tab svg{width:20px;height:20px}
-  .bottombar{padding:8px 16px;font-size:9px}
   .main{padding:14px 16px;gap:10px}
   .url-card{padding:12px 14px}
   .result-card{padding:12px 14px}
-  .filter-grid{grid-template-columns:1fr 1fr}
   .score-row{gap:10px}
   .dial{width:48px;height:48px}
-  .dial-num{font-size:12px;transform:translate(-50%,-50%)}
+  .dial svg{width:48px;height:48px}
+  .dial-num{font-size:12px}
   .match-item{padding:9px 11px}
   .mini-label{width:100px;font-size:9px}
   .history-item{padding:11px 13px}
@@ -250,7 +256,11 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
     <div class="brand-name">Who's Behind That?</div>
     <div class="brand-badge">Client</div>
   </div>
-  <div class="topbar-right">Powered by Claude AI</div>
+  <div class="topbar-right">
+    <span class="topbar-desktop-only">Powered by Claude AI</span>
+    <span id="app-ver-topbar" class="topbar-mobile-only">app v1.1.2</span>
+    <span id="srv-ver-topbar" class="topbar-mobile-only">srv —</span>
+  </div>
 </div>
 
 <!-- NAV -->
@@ -577,7 +587,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.1.1';
+const CLIENT_VERSION = '1.1.3';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
@@ -643,6 +653,11 @@ function updateSidebar() {
 // NAV
 // ─────────────────────────────────────────────
 function showPage(name, el) {
+  // If leaving analyze tab, reset it
+  const currentPage = document.querySelector('.page.active');
+  if (currentPage && currentPage.id === 'page-analyze' && name !== 'analyze') {
+    resetAnalysis();
+  }
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   document.getElementById('page-' + name).classList.add('active');
@@ -731,8 +746,6 @@ function resetAnalysis() {
   document.getElementById('loader').classList.remove('active');
   document.getElementById('results').classList.remove('active');
   document.getElementById('url-input').value = '';
-  document.getElementById('manual-actor-handle').value = '';
-  document.getElementById('actor-handle-row').style.display = 'none';
   document.getElementById('post-text').value = '';
   document.getElementById('manual-fallback').style.display = 'none';
   document.getElementById('actor-prompt').style.display = 'none';
@@ -798,14 +811,10 @@ async function analyzeWithManualText() {
 }
 
 function finishAnalysis(entry) {
-  // Clear analyze tab
   document.getElementById('loader').classList.remove('active');
-  document.getElementById('url-input').value = '';
-  document.getElementById('manual-fallback').style.display = 'none';
-  document.getElementById('post-text').value = '';
-  // Show toast pointing to history
+  showResults(entry ? entry.url : '', entry ? entry.fullResult : {});
   const scanId = entry ? entry.scanId : '';
-  toastLong('Analysis saved to My history' + (scanId ? ' — ' + scanId : ''));
+  toastLong('Analysis complete — saved to My history' + (scanId ? ' · ' + scanId : ''));
 }
 
 async function performServerAnalysis(url) {
@@ -1154,7 +1163,7 @@ function renderResultInto(container, url, d) {
       '<div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">' +
         '<div class="dial">' +
           '<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="var(--blue-mid)" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="' + color + '" stroke-width="5" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" stroke-linecap="round" transform="rotate(-90 30 30)"/></svg>' +
-          '<div class="dial-num" style="color:' + (pct>0?color:'var(--text3)') + '">' + pct + '%</div>' +
+          '<div class="dial-num" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:' + (pct>0?color:'var(--text3)') + '">' + pct + '%</div>' +
         '</div>' +
         '<div><div class="score-title">' + escHtml(d.overall.label) + '</div><div class="score-sub">' + escHtml(d.overall.desc||'') + '</div></div>' +
       '</div>' +
@@ -1222,12 +1231,16 @@ function renderHistory() {
 // ─────────────────────────────────────────────
 function initStatusBar() {
   document.getElementById('app-ver-label').textContent = 'app v' + CLIENT_VERSION;
+  const appVerTopbar = document.getElementById('app-ver-topbar');
+  if (appVerTopbar) appVerTopbar.textContent = 'app v' + CLIENT_VERSION;
   fetch(SERVER_URL + '/')
     .then(function(r){ return r.json(); })
     .then(function(d){
       document.getElementById('status-dot').className = 'status-dot';
       document.getElementById('status-text').textContent = 'Server online';
       document.getElementById('srv-ver-label').textContent = 'srv v' + (d.version||'?');
+      const srvTopbar = document.getElementById('srv-ver-topbar');
+      if (srvTopbar) srvTopbar.textContent = 'srv v' + (d.version||'?');
       _cachedSrvVersion = d.version || '?';
     })
     .catch(function(){
