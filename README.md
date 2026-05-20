@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.1.0 (client) | Server: v1.11.0 | Admin: v2.1.1
+- Mobile: sidebar hidden on small screens, replaced with bottom tab bar (Analyze / History / About)
+- Fixed actor research prompt incorrectly showing Instagram/Facebook detection message for all platforms — now shows a generic "Would you like to research this account?" prompt
+- Fallback message when fetch fails is now platform-agnostic: no mention of specific platforms, just a clear message about public post access with paste option
+
 ### v1.0.1 (client) | Server: v1.11.0 | Admin: v2.0.0
 **Server: v1.10.4**
 - Client scans now saved to shared database — visible in admin history
