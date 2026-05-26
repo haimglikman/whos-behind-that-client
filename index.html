@@ -587,7 +587,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.1.3';
+const CLIENT_VERSION = '1.2.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
@@ -653,7 +653,6 @@ function updateSidebar() {
 // NAV
 // ─────────────────────────────────────────────
 function showPage(name, el) {
-  // If leaving analyze tab, reset it
   const currentPage = document.querySelector('.page.active');
   if (currentPage && currentPage.id === 'page-analyze' && name !== 'analyze') {
     resetAnalysis();
@@ -663,7 +662,23 @@ function showPage(name, el) {
   document.getElementById('page-' + name).classList.add('active');
   if (el) el.classList.add('active');
   if (name === 'history') renderHistory();
+  if (history.state && history.state.page !== name) {
+    history.pushState({ page: name }, '', '#' + name);
+  }
 }
+
+window.addEventListener('popstate', function(e) {
+  const name = (e.state && e.state.page) || (location.hash.replace('#','')) || 'analyze';
+  const el = document.getElementById('nav-' + name);
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  const pageEl = document.getElementById('page-' + name);
+  if (pageEl) pageEl.classList.add('active');
+  if (el) el.classList.add('active');
+  if (name === 'history') renderHistory();
+  // sync mobile tabs
+  setMobileTab(name);
+});
 
 // ─────────────────────────────────────────────
 // HELPERS
@@ -714,7 +729,40 @@ function generateScanId(srvVer) {
   const av = CLIENT_VERSION.replace(/\./g,'');
   const sv = (srvVer||'?').replace(/\./g,'');
   const random = Math.random().toString(36).substring(2,6).toUpperCase();
-  return 'WBT-' + date + '-' + av + '-' + sv + '-' + random;
+  const prefix = hashToPrefix(getDeviceId());
+  return 'WBT-' + prefix + '-' + date + '-' + av + '-' + sv + '-' + random;
+}
+
+function hashToPrefix(deviceId) {
+  if (!deviceId) return 'UNKN';
+  let h = 0;
+  for (let i = 0; i < deviceId.length; i++) h = (Math.imul(31, h) + deviceId.charCodeAt(i)) | 0;
+  return Math.abs(h).toString(36).slice(0,4).toUpperCase();
+}
+
+function migrateLocalHistory() {
+  const h = getHistory();
+  let changed = false;
+  const prefix = hashToPrefix(getDeviceId());
+  h.forEach(function(e) {
+    // Convert numeric-only id to WBT format
+    if (!e.scanId || e.scanId.startsWith('WBT-legacy-')) {
+      const ts = e.ts ? new Date(e.ts) : new Date(e.id || Date.now());
+      const date = ts.getFullYear().toString() + String(ts.getMonth()+1).padStart(2,'0') + String(ts.getDate()).padStart(2,'0');
+      const av = (e.appVersion||'?').replace(/\./g,'');
+      const sv = (e.serverVersion||'?').replace(/\./g,'');
+      const rand = Math.abs(e.id||Date.now()).toString(36).slice(-4).toUpperCase();
+      e.scanId = 'WBT-' + prefix + '-' + date + '-' + av + '-' + sv + '-' + rand;
+      changed = true;
+    }
+    // Add user prefix to old WBT IDs: WBT-20260519-... → WBT-HDR7-20260519-...
+    if (e.scanId && /^WBT-\d{8}-/.test(e.scanId)) {
+      e.scanId = e.scanId.replace(/^WBT-/, 'WBT-' + prefix + '-');
+      changed = true;
+    }
+    if (e.comment === undefined) { e.comment = ''; changed = true; }
+  });
+  if (changed) saveHistory(h);
 }
 
 // ─────────────────────────────────────────────
@@ -1253,12 +1301,24 @@ function initStatusBar() {
 // INIT
 // ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function() {
-  getDeviceId(); // ensure device ID exists
+  getDeviceId();
+  migrateLocalHistory();
   updateSidebar();
   initStatusBar();
-  // Set contact email
   const emailEl = document.getElementById('contact-email');
   if (emailEl) { emailEl.href = 'mailto:' + CONTACT_EMAIL; emailEl.textContent = CONTACT_EMAIL; }
+  // Handle initial hash + init history state
+  const initPage = location.hash.replace('#','') || 'analyze';
+  if (initPage !== 'analyze' && document.getElementById('page-' + initPage)) {
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+    document.getElementById('page-' + initPage).classList.add('active');
+    const el = document.getElementById('nav-' + initPage);
+    if (el) el.classList.add('active');
+    setMobileTab(initPage);
+    if (initPage === 'history') renderHistory();
+  }
+  history.replaceState({ page: initPage }, '', '#' + initPage);
 });
 
 function setMobileTab(name) {
