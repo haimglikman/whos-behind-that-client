@@ -587,7 +587,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.2.0';
+const CLIENT_VERSION = '1.2.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
@@ -668,7 +668,11 @@ function showPage(name, el) {
 }
 
 window.addEventListener('popstate', function(e) {
-  const name = (e.state && e.state.page) || (location.hash.replace('#','')) || 'analyze';
+  const hash = location.hash.replace('#','');
+  // If overlay is open and we went back, close it
+  const overlay = document.getElementById('history-inline-result');
+  if (overlay) { overlay.remove(); return; }
+  const name = (e.state && e.state.page) || hash.split('/')[0] || 'analyze';
   const el = document.getElementById('nav-' + name);
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
@@ -676,7 +680,6 @@ window.addEventListener('popstate', function(e) {
   if (pageEl) pageEl.classList.add('active');
   if (el) el.classList.add('active');
   if (name === 'history') renderHistory();
-  // sync mobile tabs
   setMobileTab(name);
 });
 
@@ -1129,11 +1132,11 @@ async function saveToHistory(url, postText, result, srvVer) {
   h.unshift(entry);
   if (h.length > 200) h.splice(200);
   saveHistory(h);
-  // Save to shared server DB
+  // Save to shared server DB — use scanId as primary key, not numeric timestamp
   fetch(SERVER_URL + '/history/save', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(entry)
+    body: JSON.stringify(Object.assign({}, entry, { id: scanId }))
   }).catch(function(e){ console.warn('Server history save failed:', e.message); });
   return entry;
 }
@@ -1167,7 +1170,6 @@ function openHistoryEntry(id) {
   const h = getHistory();
   const entry = h.find(function(e){ return e.id === id; });
   if (!entry || !entry.fullResult) { toast('Full result not available for this scan.'); return; }
-  // Show inline in history tab — don't switch pages
   const existing = document.getElementById('history-inline-result');
   if (existing) existing.remove();
   const wrap = document.createElement('div');
@@ -1175,14 +1177,21 @@ function openHistoryEntry(id) {
   wrap.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:50;overflow:auto;padding-bottom:70px';
   wrap.innerHTML =
     '<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:1">' +
-      '<button onclick="document.getElementById(\'history-inline-result\').remove()" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);color:var(--text2)">← Back</button>' +
+      '<button onclick="closeHistoryOverlay()" style="background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);color:var(--text2)">← Back</button>' +
       '<span style="font-size:11px;color:var(--text3);font-family:var(--mono)">' + escHtml(entry.scanId||'') + '</span>' +
     '</div>' +
     '<div style="padding:16px"></div>';
   document.body.appendChild(wrap);
-  // Render result into the overlay
   const resultArea = wrap.querySelector('div:last-child');
   renderResultInto(resultArea, entry.url, entry.fullResult);
+  // Push to browser history so back button closes the overlay
+  history.pushState({ page: 'history', scanId: entry.scanId }, '', '#history/' + (entry.scanId||''));
+}
+
+function closeHistoryOverlay() {
+  const el = document.getElementById('history-inline-result');
+  if (el) el.remove();
+  history.back();
 }
 
 function renderResultInto(container, url, d) {
