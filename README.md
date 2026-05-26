@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.2.1 — bug fix (client) | Server: v1.11.1 | Admin: v2.2.1
+- Client now sends WBT scan ID (not numeric timestamp) as primary DB key — fixes ID mismatch with admin
+- Back button from history entry overlay now correctly closes the overlay
+
 ### v1.2.0 (client) | Server: v1.11.0 | Admin: v2.2.0
 - Scan IDs now include user prefix: WBT-{XXXX}-{date}-... where XXXX is last 4 of hashed device ID
 - Retroactive migration: old IDs upgraded to include user prefix
