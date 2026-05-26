@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.3.0 (client) | Server: v1.11.1 | Admin: v2.2.1
+- Post text now shown in results view and when replaying a scan from history
+- Removed technical scoring summary — admin-only detail
+
 ### v1.2.1 — bug fix (client) | Server: v1.11.1 | Admin: v2.2.1
 - Client now sends WBT scan ID (not numeric timestamp) as primary DB key — fixes ID mismatch with admin
 - Back button from history entry overlay now correctly closes the overlay
