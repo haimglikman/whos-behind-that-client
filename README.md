@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.2.0 (client) | Server: v1.11.0 | Admin: v2.2.0
+- Scan IDs now include user prefix: WBT-{XXXX}-{date}-... where XXXX is last 4 of hashed device ID
+- Retroactive migration: old IDs upgraded to include user prefix
+- Browser back/forward buttons now navigate between tabs within the app
+
 ### v1.1.3 — bug fix (client) | Server: v1.11.0 | Admin: v2.1.1
 - Fixed dial percentage position on mobile — explicit SVG dimensions prevent layout collapse
 - Versions (app + server) now shown in top-right corner on mobile since bottom bar is hidden behind tab bar
