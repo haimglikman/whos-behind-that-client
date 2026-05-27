@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.4.0 (client) | Server: v1.12.0 | Admin: v2.3.0
+- Browser tab now shows "Who's Behind That? — Client"
+- Analyze tab: scan ID shown prominently with "Scan ID" label
+- Analyze tab: "↗ Open post" button next to URL
+
 ### v1.3.0 (client) | Server: v1.11.1 | Admin: v2.2.1
 - Post text now shown in results view and when replaying a scan from history
 - Removed technical scoring summary — admin-only detail
