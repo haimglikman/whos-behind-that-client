@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.5.0 (client) | Server: v1.12.0 | Admin: v2.3.0
+- Server warm-up screen on load: shows spinner while server wakes from sleep, retries 3 times, fades out when ready
+- Fixed scan ID and Open Post button not appearing in results — now shown prominently after every analysis
+
 ### v1.4.0 (client) | Server: v1.12.0 | Admin: v2.3.0
 - Browser tab now shows "Who's Behind That? — Client"
 - Analyze tab: scan ID shown prominently with "Scan ID" label
