@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Who's Behind That?</title>
+<title>Who's Behind That? — Client</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -330,7 +330,14 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 
       <!-- Results -->
       <div class="results" id="results">
-        <div class="result-url" id="result-url"></div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:4px 10px">
+            <span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Scan ID</span>
+            <span id="result-scan-id" style="font-size:11px;color:var(--blue);font-weight:700;font-family:var(--sans)"></span>
+          </div>
+          <span class="result-url" id="result-url" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <button id="jump-url-btn" class="btn-primary btn-sm" onclick="jumpToUrl()" style="display:none">↗ Open post</button>
+        </div>
         <div id="result-post-text" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.7;font-weight:500;white-space:pre-wrap;word-break:break-word"></div>
 
         <!-- Overall score card -->
@@ -587,7 +594,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.3.0';
+const CLIENT_VERSION = '1.4.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
@@ -792,6 +799,11 @@ let currentResult = null;
 let pendingActorHandle = null;
 let pendingActorUrl = null;
 
+function jumpToUrl() {
+  const url = document.getElementById('result-url').textContent;
+  if (url) window.open(url, '_blank', 'noopener');
+}
+
 function resetAnalysis() {
   hideError();
   document.getElementById('loader').classList.remove('active');
@@ -863,7 +875,10 @@ async function analyzeWithManualText() {
 
 function finishAnalysis(entry) {
   document.getElementById('loader').classList.remove('active');
-  showResults(entry ? entry.url : '', entry ? entry.fullResult : {});
+  if (entry && entry.fullResult) {
+    entry.fullResult.scanId = entry.scanId;
+    showResults(entry.url || '', entry.fullResult);
+  }
   const scanId = entry ? entry.scanId : '';
   toastLong('Analysis complete — saved to My history' + (scanId ? ' · ' + scanId : ''));
 }
@@ -921,6 +936,10 @@ function showResults(url, d) {
   document.getElementById('results').classList.add('active');
   document.getElementById('results').classList.add('active');
   document.getElementById('result-url').textContent = url;
+  const scanIdEl = document.getElementById('result-scan-id');
+  if (scanIdEl) scanIdEl.textContent = d.scanId || '';
+  const jumpBtn = document.getElementById('jump-url-btn');
+  if (jumpBtn) jumpBtn.style.display = url ? 'inline-flex' : 'none';
   currentResult = Object.assign({url:url}, d);
 
   // Dial
