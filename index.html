@@ -198,6 +198,13 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--text);border-radius:10px;padding:10px 16px;font-size:12px;color:#fff;z-index:1000;opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;font-weight:600}
 .toast.show{opacity:1;transform:translateY(0)}
+.warmup-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;font-family:var(--sans)}
+.warmup-brand{display:flex;align-items:center;gap:10px}
+.warmup-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),#0a3fa8);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.warmup-name{font-size:20px;font-weight:700;color:var(--text)}
+.warmup-spinner{width:28px;height:28px;border:3px solid var(--blue-mid);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
+.warmup-msg{font-size:13px;color:var(--text3);font-weight:500;text-align:center;max-width:260px;line-height:1.6}
+.warmup-retry{background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);display:none}
 
 /* ── BOTTOM BAR ── */
 .bottombar{background:var(--surface);border-top:1px solid var(--border);padding:8px 28px;display:flex;align-items:center;gap:16px;font-size:10px;color:var(--text3);font-weight:600;flex-shrink:0}
@@ -246,6 +253,19 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 </style>
 </head>
 <body>
+
+<!-- WARM-UP SCREEN -->
+<div class="warmup-screen" id="warmup-screen">
+  <div class="warmup-brand">
+    <div class="warmup-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="white" stroke-width="2"/><path d="M10 6v4l2.5 1.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </div>
+    <div class="warmup-name">Who's Behind That?</div>
+  </div>
+  <div class="warmup-spinner" id="warmup-spinner"></div>
+  <div class="warmup-msg" id="warmup-msg">Connecting to server...</div>
+  <button class="warmup-retry" id="warmup-retry" onclick="startWarmup()">Try again</button>
+</div>
 
 <!-- TOPBAR -->
 <div class="topbar">
@@ -330,8 +350,8 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 
       <!-- Results -->
       <div class="results" id="results">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-          <div style="display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:4px 10px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px" id="result-header-row" style="display:none">
+          <div id="result-scan-id-box" style="display:none;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:4px 10px">
             <span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Scan ID</span>
             <span id="result-scan-id" style="font-size:11px;color:var(--blue);font-weight:700;font-family:var(--sans)"></span>
           </div>
@@ -594,7 +614,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.4.0';
+const CLIENT_VERSION = '1.5.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
@@ -808,6 +828,8 @@ function resetAnalysis() {
   hideError();
   document.getElementById('loader').classList.remove('active');
   document.getElementById('results').classList.remove('active');
+  const headerRow = document.getElementById('result-header-row');
+  if (headerRow) headerRow.style.display = 'none';
   document.getElementById('url-input').value = '';
   document.getElementById('post-text').value = '';
   document.getElementById('manual-fallback').style.display = 'none';
@@ -936,8 +958,13 @@ function showResults(url, d) {
   document.getElementById('results').classList.add('active');
   document.getElementById('results').classList.add('active');
   document.getElementById('result-url').textContent = url;
+  const headerRow = document.getElementById('result-header-row');
+  if (headerRow) headerRow.style.display = 'flex';
   const scanIdEl = document.getElementById('result-scan-id');
-  if (scanIdEl) scanIdEl.textContent = d.scanId || '';
+  const scanIdBox = document.getElementById('result-scan-id-box');
+  const scanId = d.scanId || '';
+  if (scanIdEl) scanIdEl.textContent = scanId;
+  if (scanIdBox) scanIdBox.style.display = scanId ? 'flex' : 'none';
   const jumpBtn = document.getElementById('jump-url-btn');
   if (jumpBtn) jumpBtn.style.display = url ? 'inline-flex' : 'none';
   currentResult = Object.assign({url:url}, d);
@@ -1342,10 +1369,8 @@ window.addEventListener('DOMContentLoaded', function() {
   getDeviceId();
   migrateLocalHistory();
   updateSidebar();
-  initStatusBar();
   const emailEl = document.getElementById('contact-email');
   if (emailEl) { emailEl.href = 'mailto:' + CONTACT_EMAIL; emailEl.textContent = CONTACT_EMAIL; }
-  // Handle initial hash + init history state
   const initPage = location.hash.replace('#','') || 'analyze';
   if (initPage !== 'analyze' && document.getElementById('page-' + initPage)) {
     document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
@@ -1357,7 +1382,59 @@ window.addEventListener('DOMContentLoaded', function() {
     if (initPage === 'history') renderHistory();
   }
   history.replaceState({ page: initPage }, '', '#' + initPage);
+  startWarmup();
 });
+
+async function startWarmup() {
+  const screen = document.getElementById('warmup-screen');
+  const msg = document.getElementById('warmup-msg');
+  const spinner = document.getElementById('warmup-spinner');
+  const retry = document.getElementById('warmup-retry');
+  if (!screen) return;
+  screen.style.display = 'flex';
+  spinner.style.display = 'block';
+  retry.style.display = 'none';
+  msg.textContent = 'Connecting to server...';
+  // Try up to 3 times with increasing delay (handles cold start)
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      if (attempt > 1) msg.textContent = 'Server is waking up, please wait' + (attempt > 1 ? ' (' + attempt + '/3)...' : '...');
+      const r = await fetch(SERVER_URL + '/', { signal: AbortSignal.timeout(12000) });
+      const d = await r.json();
+      _cachedSrvVersion = d.version || '?';
+      // Update status bar
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+      const srvLabel = document.getElementById('srv-ver-label');
+      const srvTopbar = document.getElementById('srv-ver-topbar');
+      const appVerLabel = document.getElementById('app-ver-label');
+      if (statusDot) statusDot.className = 'status-dot';
+      if (statusText) statusText.textContent = 'Server online';
+      if (srvLabel) srvLabel.textContent = 'srv v' + _cachedSrvVersion;
+      if (srvTopbar) srvTopbar.textContent = 'srv v' + _cachedSrvVersion;
+      if (appVerLabel) appVerLabel.textContent = 'app v' + CLIENT_VERSION;
+      const appVerTopbar = document.getElementById('app-ver-topbar');
+      if (appVerTopbar) appVerTopbar.textContent = 'app v' + CLIENT_VERSION;
+      // Dismiss screen
+      msg.textContent = 'Ready!';
+      spinner.style.display = 'none';
+      await new Promise(function(r){ setTimeout(r, 400); });
+      screen.style.opacity = '0';
+      screen.style.transition = 'opacity 0.3s';
+      await new Promise(function(r){ setTimeout(r, 300); });
+      screen.style.display = 'none';
+      return;
+    } catch(e) {
+      if (attempt < 3) {
+        await new Promise(function(r){ setTimeout(r, 3000); });
+      }
+    }
+  }
+  // All attempts failed
+  spinner.style.display = 'none';
+  msg.textContent = 'Could not reach the server. Check your connection or try again.';
+  retry.style.display = 'block';
+}
 
 function setMobileTab(name) {
   document.querySelectorAll('.mobile-tab').forEach(function(t){ t.classList.remove('active'); });
