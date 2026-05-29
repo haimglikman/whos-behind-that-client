@@ -614,7 +614,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.5.0';
+const CLIENT_VERSION = '1.5.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@example.com'; // replace with real email
@@ -917,8 +917,9 @@ async function performServerAnalysis(url) {
   if (!res.ok) { const e = await res.json().catch(function(){return {};}); throw new Error(e.error || 'Server error ' + res.status); }
   adv(1); await delay(250); adv(2); await delay(250); adv(3); await delay(250); adv(4); await delay(250); adv(5); await delay(200);
   const data = await res.json();
+  const finalUrl = data.url || url;
   const result = buildResult(data.analysis, data.post, entities);
-  const entry = await saveToHistory(url, (data.post&&data.post.text)||'', result, null).catch(function(e){ console.warn('History save error:', e.message); });
+  const entry = await saveToHistory(finalUrl, (data.post&&data.post.text)||'', result, null).catch(function(e){ console.warn('History save error:', e.message); });
   incrementScanCount();
   finishAnalysis(entry);
 }
