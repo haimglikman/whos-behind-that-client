@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.5.1 — bug fix (client) | Server: v1.12.2 | Admin: v2.3.1
+- Same URL normalization fix as admin
+
 ### v1.5.0 (client) | Server: v1.12.0 | Admin: v2.3.0
 - Server warm-up screen on load: shows spinner while server wakes from sleep, retries 3 times, fades out when ready
 - Fixed scan ID and Open Post button not appearing in results — now shown prominently after every analysis
