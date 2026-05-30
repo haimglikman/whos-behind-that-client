@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.6.0 (client) | Server: v1.12.4 | Admin: v2.3.1
+- Actor research now counts against the daily scan limit — only on success, not on failed requests
+
 ### v1.5.1 — bug fix (client) | Server: v1.12.2 | Admin: v2.3.1
 - Same URL normalization fix as admin
 
