@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.7.0 (client) | Server: v1.12.4 | Admin: v2.4.0
+- Expanded About tab with full Disclaimer section covering AI results, accuracy limitations, non-endorsement, editorial neutrality, scope, and intended use
+- Added Anthropic third-party data processing disclosure
+- Updated contact email to contact@whosbehindthat.com
+
 ### v1.6.0 (client) | Server: v1.12.4 | Admin: v2.3.1
 - Actor research now counts against the daily scan limit — only on success, not on failed requests
 
