@@ -1,5 +1,12 @@
 # whos-behind-that-client
 
+### v1.8.0 (client) | Server: v1.13.0 | Admin: v2.7.0
+- News website support: analyze articles from Ynet, Haaretz, BBC, NYT, and 60+ other outlets
+- Actor research on news articles: profiles both the author and the publication (editorial line, ownership, agenda)
+- Actor research now uses web search for better results
+- Actor searches saved to server DB with scan ID — visible in admin
+- News platform icon (📰) in history
+
 ### v1.7.0 (client) | Server: v1.12.4 | Admin: v2.4.0
 - Expanded About tab with full Disclaimer section covering AI results, accuracy limitations, non-endorsement, editorial neutrality, scope, and intended use
 - Added Anthropic third-party data processing disclosure
