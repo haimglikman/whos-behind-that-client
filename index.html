@@ -630,7 +630,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.7.0';
+const CLIENT_VERSION = '1.8.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -753,6 +753,11 @@ function detectPlatform(url) {
   if (/x\.com|twitter\.com/i.test(url)) return 'x';
   if (/instagram\.com/i.test(url)) return 'instagram';
   if (/facebook\.com|fb\.com/i.test(url)) return 'facebook';
+  try {
+    const domain = new URL(url).hostname.replace(/^www\./, '');
+    const newsDomains = ['ynet.co.il','ynetnews.com','haaretz.co.il','haaretz.com','israelhayom.co.il','israelhayom.com','inn.co.il','arutzsheva.co.il','mako.co.il','n12.co.il','kan.org.il','walla.co.il','maariv.co.il','timesofisrael.com','jpost.com','jerusalempost.com','972mag.com','calcalist.co.il','globes.co.il','themarker.com','channel14.co.il','i24news.tv','bbc.com','bbc.co.uk','reuters.com','apnews.com','nytimes.com','washingtonpost.com','theguardian.com','aljazeera.com','aljazeera.net','cnn.com','foxnews.com','wsj.com','ft.com','economist.com','middleeasteye.net','almonitor.com','foreignpolicy.com','tabletmag.com','memri.org','le-monde.fr','lemonde.fr','derspiegel.de','spiegel.de','atlanticcouncil.org','independent.co.uk','telegraph.co.uk','nbcnews.com','apnews.com','axios.com','bloomberg.com','newsweek.com','vox.com','politico.com','thehill.com'];
+    if (newsDomains.includes(domain)) return 'news';
+  } catch(e) {}
   return 'unknown';
 }
 function alignmentColor(pct) {
@@ -1063,7 +1068,11 @@ function showResults(url, d) {
     } else {
       pendingActorHandle = handle;
       pendingActorUrl = url;
-      document.getElementById('actor-prompt-text').textContent = 'Would you like to research the account "@' + handle + '"?';
+      const platform = detectPlatform(url);
+      const promptText = platform === 'news'
+        ? 'Would you like to research the author "' + handle + '" and the publication?'
+        : 'Would you like to research the account "@' + handle + '"?';
+      document.getElementById('actor-prompt-text').textContent = promptText;
       document.getElementById('actor-prompt').style.display = 'block';
     }
   } else {
@@ -1127,6 +1136,7 @@ function dismissActorPrompt() {
 async function researchActor() {
   if (!pendingActorHandle) return;
   const handle = pendingActorHandle;
+  const actorScanId = generateScanId(_cachedSrvVersion || '?');
   document.getElementById('actor-prompt').style.display = 'none';
   document.getElementById('actor-result-card').style.display = 'block';
   const body = document.getElementById('actor-result-body');
@@ -1134,32 +1144,50 @@ async function researchActor() {
   try {
     const res = await fetch(SERVER_URL + '/research-actor', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ handle, url: pendingActorUrl })
+      body: JSON.stringify({
+        handle, url: pendingActorUrl,
+        source: 'client', deviceId: getDeviceId(),
+        appVersion: CLIENT_VERSION, actorScanId
+      })
     });
     if (!res.ok) throw new Error('Server error');
     const data = await res.json();
     const actors = getActors();
-    actors[actorKey(handle)] = Object.assign({}, data.actor, { handle, ts: new Date().toISOString() });
+    actors[actorKey(handle)] = Object.assign({}, data.actor, { handle, ts: new Date().toISOString(), publication: data.publication });
     saveActors(actors);
-    renderActorCard(body, data.actor);
+    renderActorCard(body, data.actor, data.publication);
     incrementScanCount();
-    toast('Actor profile saved.');
+    toast('Actor profile saved · ' + actorScanId);
   } catch(e) {
     body.innerHTML = '<div style="font-size:12px;color:var(--red);font-weight:500">Could not research actor: ' + escHtml(e.message) + '</div>';
   }
   pendingActorHandle = null;
 }
 
-function renderActorCard(container, actor) {
+function renderActorCard(container, actor, publication) {
+  var handlesHtml = (actor.handles && actor.handles.length > 0)
+    ? '<div class="actor-handles">' + actor.handles.map(function(h){ return '<span class="actor-handle-tag">' + escHtml(h) + '</span>'; }).join('') + '</div>'
+    : '';
+  var pubHtml = publication ? renderPublicationCard(publication) : '';
   container.innerHTML =
     '<div style="margin-bottom:6px">' +
       '<div class="actor-name">' + escHtml(actor.name||actor.handle||'Unknown') + '</div>' +
       (actor.location ? '<div class="actor-location">📍 ' + escHtml(actor.location) + '</div>' : '') +
     '</div>' +
     '<div class="actor-bio">' + escHtml(actor.bio||'No biographical information found.') + '</div>' +
-    (actor.handles&&actor.handles.length>0
-      ? '<div class="actor-handles">' + actor.handles.map(function(h){ return '<span class="actor-handle-tag">' + escHtml(h) + '</span>'; }).join('') + '</div>'
-      : '');
+    handlesHtml + pubHtml;
+}
+
+function renderPublicationCard(pub) {
+  return '<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">' +
+    '<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Publication</div>' +
+    '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px">' + escHtml(pub.name||'') + '</div>' +
+    '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:500">' +
+      [pub.type, pub.country, pub.language ? pub.language + ' language' : null, pub.founded ? 'est. ' + pub.founded : null].filter(Boolean).join(' · ') +
+    '</div>' +
+    (pub.ownership ? '<div style="font-size:11px;color:var(--text2);margin-bottom:5px;font-weight:500"><strong>Ownership:</strong> ' + escHtml(pub.ownership) + '</div>' : '') +
+    '<div style="font-size:11px;color:var(--text2);line-height:1.6;font-weight:500">' + escHtml(pub.agenda||'') + '</div>' +
+  '</div>';
 }
 
 // ─────────────────────────────────────────────
@@ -1310,7 +1338,7 @@ function renderHistory() {
     list.innerHTML = '<div class="no-history">No scans yet. Analyze a post to see it here.</div>';
     return;
   }
-  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', unknown:'🔗'};
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', news:'📰', unknown:'🔗'};
   list.innerHTML = h.map(function(e) {
     const d = new Date(e.ts);
     const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
