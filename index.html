@@ -444,14 +444,22 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 
       <div class="about-section">
         <h2>What is Who's Behind That?</h2>
-        <p>Who's Behind That? is an AI-powered tool that analyzes social media posts to detect narrative alignment — whose political agenda a post serves, and what context it leaves out. It uses Claude AI to score posts against a database of geopolitical entities related to the Israeli-Palestinian conflict.</p>
+        <p>Who's Behind That? is an AI-powered tool that analyzes social media posts and news articles to detect narrative alignment — whose political agenda a post or article serves, and what context it leaves out. It uses Claude AI to score content against a database of geopolitical entities related to the Israeli-Palestinian conflict and Israeli domestic politics.</p>
         <p>This tool is designed for researchers, journalists, and media-literate individuals who want to understand the information landscape around this conflict.</p>
       </div>
 
       <div class="about-section">
         <h2>How it works</h2>
-        <p>When you analyze a post, the text is sent to our server and scored by Claude AI against each entity's known interests, tactics, and public narrative. Results show which entities benefit most from the post being spread — both directly (primary alignment) and indirectly (secondary alignment).</p>
-        <p>Each scan uses one of your 10 daily credits. Credits reset at midnight.</p>
+        <p>When you analyze a post or article, the text is sent to our server and scored by Claude AI against each entity's known interests, tactics, and public narrative. Results show which entities benefit most from the content being spread — both directly (primary alignment) and indirectly (secondary alignment). You can also research the author or journalist behind a post, and for news articles, the publication itself — including its editorial line, ownership, and known biases.</p>
+        <p>Each scan uses one of your 10 daily credits (during beta — this limit may change in future versions). Credits reset at midnight.</p>
+      </div>
+
+      <div class="about-section">
+        <h2>What can be analyzed</h2>
+        <div class="disclaimer-box">
+          <p><strong>Supported sources:</strong> Posts from X (Twitter), Facebook, and Instagram, as well as articles from major news and media websites (Ynet, Haaretz, BBC, New York Times, Al Jazeera, and many others).</p>
+          <p style="margin-top:8px"><strong>Public content only:</strong> Who's Behind That? can only access publicly available content. This means public social media posts — not friends-only posts, closed groups, or private accounts. For news articles, only freely accessible pages are supported — paywalled articles cannot be fetched automatically, but you can paste the text manually for analysis.</p>
+        </div>
       </div>
 
       <div class="about-section">
@@ -630,7 +638,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.8.0';
+const CLIENT_VERSION = '1.8.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -696,10 +704,6 @@ function updateSidebar() {
 // NAV
 // ─────────────────────────────────────────────
 function showPage(name, el) {
-  const currentPage = document.querySelector('.page.active');
-  if (currentPage && currentPage.id === 'page-analyze' && name !== 'analyze') {
-    resetAnalysis();
-  }
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   document.getElementById('page-' + name).classList.add('active');
@@ -712,7 +716,6 @@ function showPage(name, el) {
 
 window.addEventListener('popstate', function(e) {
   const hash = location.hash.replace('#','');
-  // If overlay is open and we went back, close it
   const overlay = document.getElementById('history-inline-result');
   if (overlay) { overlay.remove(); return; }
   const name = (e.state && e.state.page) || hash.split('/')[0] || 'analyze';
