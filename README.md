@@ -1,5 +1,13 @@
 # whos-behind-that-client
 
+### v1.8.1 — bug fix (client) | Server: v1.13.0 | Admin: v2.7.0
+- Analysis no longer cancels when switching tabs — runs in background and results appear when returning to Analyze tab
+- About tab: added news and media website coverage
+- About tab: added public content only disclaimer (no paywalls, no private/friends-only posts)
+- About tab: added Israeli domestic politics to scope description
+- About tab: actor research mentioned in How it works section
+- About tab: daily credit limit noted as beta — subject to change
+
 ### v1.8.0 (client) | Server: v1.13.0 | Admin: v2.7.0
 - News website support: analyze articles from Ynet, Haaretz, BBC, NYT, and 60+ other outlets
 - Actor research on news articles: profiles both the author and the publication (editorial line, ownership, agenda)
