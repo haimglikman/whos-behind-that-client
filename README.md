@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.9.0 (client) | Server: v1.13.0 | Admin: v2.7.0
+- New FAQ tab with 20 questions across four categories: Terminology, Scanning logic, Technical, Privacy
+- FAQ questions are collapsible/expandable
+- Mobile bottom tab bar now has 4 tabs: Analyze, History, FAQ, About
+
 ### v1.8.1 — bug fix (client) | Server: v1.13.0 | Admin: v2.7.0
 - Analysis no longer cancels when switching tabs — runs in background and results appear when returning to Analyze tab
 - About tab: added news and media website coverage
