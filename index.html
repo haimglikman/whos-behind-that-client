@@ -207,7 +207,17 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 .warmup-retry{background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:9px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);display:none}
 
 /* ── BOTTOM BAR ── */
-.bottombar{background:var(--surface);border-top:1px solid var(--border);padding:8px 28px;display:flex;align-items:center;gap:16px;font-size:10px;color:var(--text3);font-weight:600;flex-shrink:0}
+.faq-group{margin-bottom:24px}
+.faq-group-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.faq-item{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;overflow:hidden;background:var(--surface)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);gap:10px;user-select:none}
+.faq-q:hover{background:var(--bg2)}
+.faq-chevron{font-size:11px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.faq-item.open .faq-chevron{transform:rotate(90deg)}
+.faq-a{display:none;padding:0 14px 12px;font-size:12px;color:var(--text2);line-height:1.75;font-weight:500}
+.faq-item.open .faq-a{display:block}
+.faq-a a{color:var(--blue);text-decoration:none}
+.faq-a a:hover{text-decoration:underline}
 .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px;background:var(--green)}
 .status-dot.warn{background:var(--amber)}
 .status-dot.offline{background:var(--red)}
@@ -287,6 +297,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 <div class="nav">
   <div class="nav-item active" id="nav-analyze" onclick="showPage('analyze',this)">Analyze</div>
   <div class="nav-item" id="nav-history" onclick="showPage('history',this)">My history</div>
+  <div class="nav-item" id="nav-faq" onclick="showPage('faq',this)">FAQ</div>
   <div class="nav-item" id="nav-about" onclick="showPage('about',this)">About</div>
 </div>
 
@@ -491,6 +502,192 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
     </div>
   </div>
 
+  <!-- ── FAQ PAGE ── -->
+  <div class="page" id="page-faq">
+    <div class="about-main">
+      <div class="page-header" style="margin-bottom:20px">
+        <h1>FAQ</h1>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-label">Terminology</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>What is an entity?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">An entity is any political actor, organization, government, movement, or ideological group whose interests the tool tracks. Examples include Benjamin Netanyahu, The Palestinian Authority, The US government, the IDF, or the Israeli protest movement. Each entity has a defined profile — their known interests, tactics, and public narrative — that the AI uses to score whether a given post serves their agenda.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>What is an actor?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">An actor is the person or account behind a specific post — the author. When you research an actor, Who's Behind That? builds a profile of who they are: their background, known affiliations, political stance, and online presence. For news articles, actor research also profiles the publication itself — its editorial line, ownership, and known biases.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>What is primary vs secondary alignment?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Primary alignment means the post actively serves an entity's interests — its framing, message, or targets work in their favor. Secondary alignment means the entity benefits indirectly — the post wasn't necessarily crafted for them, but spreading it helps them nonetheless. Think of primary as "this post works for them" and secondary as "they'd be happy this post exists." Important to note: alignment does not mean the post was commissioned by the entity, that the author works for them, or that there's any direct connection — it simply reflects whose interests the content serves, intentionally or not.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-label">Scanning logic</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>How does post scanning work?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">When you submit a URL, the server automatically fetches the text of the post or article. That text is then analyzed by Claude AI, which scores it against all entities in the database simultaneously. Each entity is evaluated based on whether the post advances their strategic interests, matches their known methods, and echoes their public narrative. The highest-scoring entities above the threshold appear as primary or secondary alignments.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>How does actor scanning work?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">After a successful post scan, you're offered the option to research the account or author behind it. The server looks up publicly available information about them — their background, known affiliations, political stance, and online presence. For news articles, it also profiles the publication: its editorial line, ownership, and known biases. Results are generally accurate for well-known public figures but may be limited for anonymous or low-profile accounts.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Does the scan consider context beyond the post text?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Each scan is based solely on the post or article being analyzed — it is not influenced by the author's other posts, past scans, or any external context outside of what's in the text itself. That said, the engine considers two dimensions within the post: what it says (content) and who it attacks (context). If a post directly attacks a named political figure, the engine identifies who benefits from that attack and factors that into the score. Actor research is separate — it adds background on the author for your own interpretation, but does not feed back into the post's scoring.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Can you scan an actor without scanning a post first?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Not currently — actor research is triggered from a post scan result. This is intentional: Who's Behind That? is designed to analyze how content is framed, not to investigate individuals in isolation. The actor profile provides useful background for interpreting a specific scan, but the post itself is always the starting point.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Why do some posts score 0%?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">A zero score means the AI found no meaningful alignment with any entity above the detection threshold. This can happen when a post is genuinely neutral or factual, when the content is too vague or short to score reliably, or occasionally when the model misses context it should have caught — particularly for posts that rely heavily on irony, cultural shorthand, or implicit references. If you believe a zero result is wrong, feel free to contact us.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>What does the score percentage mean?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">The score reflects how strongly a post serves a given entity's interests, on a scale of 0 to 100. It combines three factors: strategic interest alignment, tactical fingerprint, and narrative echo. Only entities scoring above 85% appear in your results — below that threshold the signal is considered too weak to be meaningful.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>What languages are supported?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Posts in Hebrew and Arabic are automatically detected and pre-translated before scoring, with political context extracted as part of the process. English posts are scored directly. Other languages may work but results are less reliable.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>What's the difference between scanning a social media post and a news article?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Both are analyzed the same way — the text is scored against the entity database to detect whose narrative it serves. The difference is in what you're measuring: a social media post reflects what an individual chose to say and how they framed it; a news article reflects how a publication chose to cover a story, what angle it took, and what it emphasized or left out. Both are valid and meaningful signals.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>I think the scan results were wrong</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">AI scoring is imperfect. The model may miss context, misread sarcasm, or fail to identify an indirect beneficiary — especially for posts that are ambiguous, highly local, or rely on cultural knowledge. If you consistently see wrong results for a certain type of post, you can contact us — it helps improve the model.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Are the entities interchangeable?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Yes — the entity database is designed to evolve with the political landscape. Entities can be added, edited, split, or removed to reflect new developments, shifting alliances, emerging figures, or entirely new topics. The database is versioned, so you can always see which version was used for any given scan.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>How up to date is the entity database?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">The database is updated periodically to reflect the current political landscape — new parties, splits, emerging figures, and shifting alliances. Each version is numbered, and every scan records which database version was used, so you can always trace results back to the entity set that produced them.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Can Who's Behind That? work for other topics?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Yes — in principle the tool can be adapted to any topic where narrative alignment matters. Currently it's built specifically for the Israeli-Palestinian conflict and Israeli domestic politics, and the results are most reliable within that scope. Applying it to other conflicts or political landscapes would require building a dedicated entity database for that domain, which is something we're open to exploring.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-label">Technical</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>I got an error when trying to scan a post</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Who's Behind That? can only access publicly available content. Private social media posts, friends-only content, closed groups, and articles behind a paywall cannot be fetched — in those cases, you can paste the text manually instead. For Facebook and Instagram specifically, automated access is sometimes temporarily blocked by the platform — copying and pasting the post text manually is the best workaround. If the server is waking up from sleep, waiting 30 seconds and trying again usually resolves the issue.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Does actor scanning count toward my daily quota?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Yes — each actor research uses one of your daily credits, the same as a post scan. This is because it involves an AI call which has a real cost.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Can Who's Behind That? integrate with other platforms via API?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">We'd love to make that possible. API access isn't available yet — the tool is currently a web app only — but if you're interested in integration for research, journalism, or institutional use, we'd be happy to hear from you at <a href="mailto:contact@whosbehindthat.com">contact@whosbehindthat.com</a>.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-label">Privacy</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Can someone know what I scanned for?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Your scan history is stored locally on your device and is private to you. The service operator (Who's Behind That?) can see anonymized scan data — the post URL, content, and results — linked only to a randomly generated device identifier. No personal information is collected or visible to us: no IP address, no email, no device identifiers such as MAC address, and no account information of any kind. Your scans are never shared with third parties.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Is my data used to train AI models?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">No. Your scan data is not used to train Claude or any other AI model. Post text is sent to Anthropic's Claude API for analysis and is subject to Anthropic's privacy policy, but Who's Behind That? does not share your data for training purposes.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div><!-- end layout -->
 
 <!-- BOTTOM BAR -->
@@ -638,7 +835,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.8.1';
+const CLIENT_VERSION = '1.9.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1485,6 +1682,10 @@ async function startWarmup() {
   retry.style.display = 'block';
 }
 
+function toggleFaq(el) {
+  el.closest('.faq-item').classList.toggle('open');
+}
+
 function setMobileTab(name) {
   document.querySelectorAll('.mobile-tab').forEach(function(t){ t.classList.remove('active'); });
   const tab = document.getElementById('mtab-' + name);
@@ -1502,6 +1703,10 @@ function setMobileTab(name) {
   <button class="mobile-tab" id="mtab-history" onclick="showPage('history',document.getElementById('nav-history'));setMobileTab('history')">
     <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     History
+  </button>
+  <button class="mobile-tab" id="mtab-faq" onclick="showPage('faq',document.getElementById('nav-faq'));setMobileTab('faq')">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 9.5a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg>
+    FAQ
   </button>
   <button class="mobile-tab" id="mtab-about" onclick="showPage('about',document.getElementById('nav-about'));setMobileTab('about')">
     <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
