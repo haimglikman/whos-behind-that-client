@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.9.2 — bug fix (client) | Server: v1.15.0 | Admin: v2.8.0
+- Fixed URL input bar dropping down — caused by incorrect flex-direction on page layout
+- Fixed FAQ and About text confined to left half of screen — removed max-width constraint
+
 ### v1.9.1 — bug fix (client) | Server: v1.14.0 | Admin: v2.7.0
 - Fixed bottom bar (server status, app version, server version) CSS missing — now displays correctly
 - Fixed FAQ and About pages cut off — now scroll to full content
