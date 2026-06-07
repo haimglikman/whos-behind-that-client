@@ -1,5 +1,11 @@
 # whos-behind-that-client
 
+### v1.9.1 — bug fix (client) | Server: v1.14.0 | Admin: v2.7.0
+- Fixed bottom bar (server status, app version, server version) CSS missing — now displays correctly
+- Fixed FAQ and About pages cut off — now scroll to full content
+- Contact us button now opens mailto directly instead of navigating to About tab
+- Added Clear button next to Open post in results header
+
 ### v1.9.0 (client) | Server: v1.13.0 | Admin: v2.7.0
 - New FAQ tab with 20 questions across four categories: Terminology, Scanning logic, Technical, Privacy
 - FAQ questions are collapsible/expandable
