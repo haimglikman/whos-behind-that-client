@@ -42,7 +42,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 /* ── LAYOUT ── */
 .layout{display:flex;flex:1;min-height:0}
 .page{display:none;flex:1;overflow:auto}
-.page.active{display:flex;flex-direction:column}
+.page.active{display:flex}
 
 /* ── SIDEBAR ── */
 .sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;flex-shrink:0}
@@ -181,7 +181,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 .comment-field::placeholder{color:var(--text3)}
 
 /* ── ABOUT PAGE ── */
-.about-main{flex:1;padding:22px 26px;overflow:auto;max-width:680px}
+.about-main{flex:1;padding:22px 26px;overflow:auto;width:100%}
 .about-section{margin-bottom:28px}
 .about-section h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px}
 .about-section p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px;font-weight:500}
@@ -290,7 +290,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   </div>
   <div class="topbar-right">
     <span class="topbar-desktop-only">Powered by Claude AI</span>
-    <span id="app-ver-topbar" class="topbar-mobile-only">app v1.1.2</span>
+    <span id="app-ver-topbar" class="topbar-mobile-only">app v1.9.2</span>
     <span id="srv-ver-topbar" class="topbar-mobile-only">srv —</span>
   </div>
 </div>
@@ -838,7 +838,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.9.2';
+const CLIENT_VERSION = '1.9.3';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
