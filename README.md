@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.9.3 — bug fix (client) | Server: v1.15.0 | Admin: v2.8.0
+- Fixed URL input bar dropping below sidebar — caused by incorrect flex-direction on page layout
+- Fixed FAQ and About text confined to left half — removed max-width constraint
+- Fixed stale hardcoded version in topbar
+
 ### v1.9.2 — bug fix (client) | Server: v1.15.0 | Admin: v2.8.0
 - Fixed URL input bar dropping down — caused by incorrect flex-direction on page layout
 - Fixed FAQ and About text confined to left half of screen — removed max-width constraint
