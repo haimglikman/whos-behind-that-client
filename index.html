@@ -42,7 +42,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 /* ── LAYOUT ── */
 .layout{display:flex;flex:1;min-height:0}
 .page{display:none;flex:1;overflow:auto}
-.page.active{display:flex}
+.page.active{display:flex;flex-direction:column}
 
 /* ── SIDEBAR ── */
 .sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;flex-shrink:0}
@@ -222,6 +222,8 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 .status-dot.warn{background:var(--amber)}
 .status-dot.offline{background:var(--red)}
 .bar-divider{width:1px;height:12px;background:var(--border)}
+.bottombar{background:var(--surface);border-top:1px solid var(--border);padding:7px 28px;display:flex;align-items:center;gap:16px;font-size:10px;color:var(--text3);font-weight:600;flex-shrink:0}
+.bar-divider{width:1px;height:12px;background:var(--border)}
 .bar-right{margin-left:auto;font-size:10px;color:var(--border2)}
 
 /* ── MOBILE BOTTOM TAB BAR ── */
@@ -326,7 +328,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#94a3b8" stroke-width="1.2"/><path d="M6.5 5.5v4M6.5 4.5v-.5" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round"/></svg>
           Privacy policy
         </div>
-        <div class="sb-link" onclick="showPage('about',document.getElementById('nav-about'))">
+        <div class="sb-link" onclick="window.location.href='mailto:contact@whosbehindthat.com'">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3.5" width="10" height="7" rx="1" stroke="#94a3b8" stroke-width="1.2" fill="none"/><path d="M1.5 5.5l5 3 5-3" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round"/></svg>
           Contact us
         </div>
@@ -368,6 +370,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           </div>
           <span class="result-url" id="result-url" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
           <button id="jump-url-btn" class="btn-primary btn-sm" onclick="jumpToUrl()" style="display:none">↗ Open post</button>
+          <button id="clear-url-btn" class="btn btn-sm" onclick="resetAnalysis()" style="display:none;background:var(--bg2);color:var(--text3);border-color:var(--border)">✕ Clear</button>
         </div>
         <div id="result-post-text" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.7;font-weight:500;white-space:pre-wrap;word-break:break-word"></div>
 
@@ -835,7 +838,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.9.0';
+const CLIENT_VERSION = '1.9.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1051,6 +1054,8 @@ function resetAnalysis() {
   document.getElementById('results').classList.remove('active');
   const headerRow = document.getElementById('result-header-row');
   if (headerRow) headerRow.style.display = 'none';
+  const clearBtn = document.getElementById('clear-url-btn');
+  if (clearBtn) clearBtn.style.display = 'none';
   document.getElementById('url-input').value = '';
   document.getElementById('post-text').value = '';
   document.getElementById('manual-fallback').style.display = 'none';
@@ -1189,6 +1194,8 @@ function showResults(url, d) {
   if (scanIdBox) scanIdBox.style.display = scanId ? 'flex' : 'none';
   const jumpBtn = document.getElementById('jump-url-btn');
   if (jumpBtn) jumpBtn.style.display = url ? 'inline-flex' : 'none';
+  const clearBtn = document.getElementById('clear-url-btn');
+  if (clearBtn) clearBtn.style.display = 'inline-flex';
   currentResult = Object.assign({url:url}, d);
 
   // Dial
