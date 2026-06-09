@@ -1,6 +1,10 @@
 # whos-behind-that-client
 
-### v1.10.1 (client) | Server: v1.15.1 | Admin: v2.9.4
+### v1.10.2 — bug fix (client) | Server: v1.15.1 | Admin: v2.9.4
+- FAQ: moved "Is login or identification required?" and "Is Who's Behind That? free?" from Technical → Privacy
+- FAQ: moved "What platforms are supported?" and "What languages are supported?" from Scanning logic → Technical
+
+### v1.10.1 - bug fix (client) | Server: v1.15.1 | Admin: v2.9.4
 - bug fix: FAQ items appearing across all tabs — rebuilt FAQ page structure from scratch
 
 ### v1.10.0 (client) | Server: v1.15.1 | Admin: v2.9.4
