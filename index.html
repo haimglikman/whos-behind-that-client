@@ -601,14 +601,6 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What languages are supported?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Posts in Hebrew and Arabic are automatically detected and pre-translated before scoring, with political context extracted as part of the process. English posts are scored directly. Other languages may work but results are less reliable.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
             <span>What's the difference between scanning a social media post and a news article?</span>
             <span class="faq-chevron">▸</span>
           </div>
@@ -647,6 +639,19 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           <div class="faq-a">Yes — in principle the tool can be adapted to any topic where narrative alignment matters. Currently it's built specifically for the Israeli-Palestinian conflict and Israeli domestic politics, and the results are most reliable within that scope. Applying it to other conflicts or political landscapes would require building a dedicated entity database for that domain, which is something we're open to exploring.</div>
         </div>
 
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-label">Technical</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>What languages are supported?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">Posts in Hebrew and Arabic are automatically detected and pre-translated before scoring, with political context extracted as part of the process. English posts are scored directly. Other languages may work but results are less reliable.</div>
+        </div>
+
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
             <span>What platforms are supported? Does scanning work the same for all?</span>
@@ -654,10 +659,6 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           </div>
           <div class="faq-a"><em>Who's Behind That?</em> supports posts from X (Twitter), Facebook, and Instagram, as well as articles from major news and media websites including Ynet, Haaretz, Times of Israel, BBC, Al Jazeera, New York Times, and many others. The analysis itself works the same way across all platforms — once the text is retrieved, it goes through the same scoring process regardless of source. That said, every platform is built differently, and some are more restrictive than others when it comes to automated access. If scanning from a particular platform doesn't work, manually copying and pasting the text is always an option.</div>
         </div>
-      </div>
-
-      <div class="faq-group">
-        <div class="faq-group-label">Technical</div>
 
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
@@ -677,6 +678,18 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Can <em>Who's Behind That?</em> integrate with other platforms via API?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">We'd love to make that possible. API access isn't available yet — the tool is currently a web app only — but if you're interested in integration for research, journalism, or institutional use, we'd be happy to hear from you at <a href="mailto:contact@whosbehindthat.com">contact@whosbehindthat.com</a>.</div>
+        </div>
+      </div>
+
+      <div class="faq-group">
+        <div class="faq-group-label">Privacy</div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
             <span>Is login or identification required?</span>
             <span class="faq-chevron">▸</span>
           </div>
@@ -690,18 +703,6 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           </div>
           <div class="faq-a">Yes — <em>Who's Behind That?</em> is free to use during the beta period. There are no subscription fees, no payment required, and no premium tier. The tool is currently limited to 10 scans per day per device to manage API costs, but this limit may be adjusted in future versions. If you need higher usage for research or institutional purposes, contact us at <a href="mailto:contact@whosbehindthat.com">contact@whosbehindthat.com</a>.</div>
         </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Can <em>Who's Behind That?</em> integrate with other platforms via API?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">We'd love to make that possible. API access isn't available yet — the tool is currently a web app only — but if you're interested in integration for research, journalism, or institutional use, we'd be happy to hear from you at <a href="mailto:contact@whosbehindthat.com">contact@whosbehindthat.com</a>.</div>
-        </div>
-      </div>
-
-      <div class="faq-group">
-        <div class="faq-group-label">Privacy</div>
 
         <div class="faq-item">
           <div class="faq-q" onclick="toggleFaq(this)">
@@ -870,7 +871,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.10.1';
+const CLIENT_VERSION = '1.10.2';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
