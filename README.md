@@ -1,5 +1,12 @@
 # whos-behind-that-client
 
+### v1.10.0 (client) | Server: v1.15.1 | Admin: v2.9.4
+- New FAQ: What is Hidden Convergent Interest?
+- New FAQ: What platforms are supported? Does scanning work the same for all?
+- New FAQ: Is login or identification required?
+- New FAQ: Is Who's Behind That? free?
+- "Who's Behind That?" now italicized everywhere it appears in app text
+
 ### v1.9.3 — bug fix (client) | Server: v1.15.0 | Admin: v2.8.0
 - Fixed URL input bar dropping below sidebar — caused by incorrect flex-direction on page layout
 - Fixed FAQ and About text confined to left half — removed max-width constraint
