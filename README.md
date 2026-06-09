@@ -1,5 +1,12 @@
 # whos-behind-that-client
 
+### v1.10.1 (client) | Server: v1.15.1 | Admin: v2.9.4
+- New FAQ: What is Hidden Convergent Interest? (Terminology)
+- New FAQ: What platforms are supported? (Scanning logic)
+- New FAQ: Is login or identification required? (Technical)
+- New FAQ: Is Who's Behind That? free? (Technical)
+- "Who's Behind That?" italicized throughout app text
+
 ### v1.10.0 (client) | Server: v1.15.1 | Admin: v2.9.4
 - New FAQ: What is Hidden Convergent Interest?
 - New FAQ: What platforms are supported? Does scanning work the same for all?
