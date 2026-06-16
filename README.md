@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.11.0 (client) | Server: v1.16.1 | Admin: v2.10.1
+- New FAQ: Does Who's Behind That? use cookies? (Privacy)
+- New FAQ: Are the entities static or dynamic? (Scanning logic)
+- Privacy disclaimer in About tab updated with no-cookies clarification
+
 ### v1.10.2 — bug fix (client) | Server: v1.15.1 | Admin: v2.9.4
 - FAQ: moved "Is login or identification required?" and "Is Who's Behind That? free?" from Technical → Privacy
 - FAQ: moved "What platforms are supported?" and "What languages are supported?" from Scanning logic → Technical
