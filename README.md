@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.11.1 — bug fix (client) | Server: v1.16.1 | Admin: v2.10.1
+- Fixed server warm-up failing on iPhones with iOS versions before 16 — AbortSignal.timeout() is unsupported there, replaced with manual AbortController implementation
+
 ### v1.11.0 (client) | Server: v1.16.1 | Admin: v2.10.1
 - New FAQ: Does Who's Behind That? use cookies? (Privacy)
 - New FAQ: Are the entities static or dynamic? (Scanning logic)
