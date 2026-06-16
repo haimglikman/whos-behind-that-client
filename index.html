@@ -888,7 +888,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.11.0';
+const CLIENT_VERSION = '1.11.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1702,7 +1702,10 @@ async function startWarmup() {
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       if (attempt > 1) msg.textContent = 'Server is waking up, please wait' + (attempt > 1 ? ' (' + attempt + '/3)...' : '...');
-      const r = await fetch(SERVER_URL + '/', { signal: AbortSignal.timeout(12000) });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(function(){ controller.abort(); }, 12000);
+      const r = await fetch(SERVER_URL + '/', { signal: controller.signal });
+      clearTimeout(timeoutId);
       const d = await r.json();
       _cachedSrvVersion = d.version || '?';
       // Update status bar
