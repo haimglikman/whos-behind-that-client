@@ -495,6 +495,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           <p style="margin-top:8px"><strong>Who can see your scans:</strong> Your scan history is private to your device. The service operator may access anonymized scan data (identified only by a hashed device ID) for the purpose of improving the tool.</p>
           <p style="margin-top:8px"><strong>Data retention:</strong> Scan data is retained for service operation purposes. You may request deletion by contacting us.</p>
           <p style="margin-top:8px"><strong>Third parties:</strong> Post text is sent to Anthropic's Claude API for analysis. Anthropic's privacy policy applies to that processing. No data is shared with any other third party.</p>
+          <p style="margin-top:8px"><strong>No cookies:</strong> <em>Who's Behind That?</em> does not use cookies. It relies on browser local storage only, which stays on your device and is not used for tracking across other sites.</p>
         </div>
       </div>
 
@@ -639,6 +640,14 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           <div class="faq-a">Yes — in principle the tool can be adapted to any topic where narrative alignment matters. Currently it's built specifically for the Israeli-Palestinian conflict and Israeli domestic politics, and the results are most reliable within that scope. Applying it to other conflicts or political landscapes would require building a dedicated entity database for that domain, which is something we're open to exploring.</div>
         </div>
 
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Are the entities static or dynamic?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">The entity database is reviewed on a weekly basis and updated when meaningful developments occur — such as election results, shifting alliances, new political figures, or major strategic changes. Minor day-to-day news doesn't trigger updates; only changes that genuinely affect an entity's interests or behavior do.</div>
+        </div>
+
       </div>
 
       <div class="faq-group">
@@ -718,6 +727,14 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
             <span class="faq-chevron">▸</span>
           </div>
           <div class="faq-a">No. Your scan data is not used to train Claude or any other AI model. Post text is sent to Anthropic's Claude API for analysis and is subject to Anthropic's privacy policy, but <em>Who's Behind That?</em> does not share your data for training purposes.</div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <span>Does <em>Who's Behind That?</em> use cookies?</span>
+            <span class="faq-chevron">▸</span>
+          </div>
+          <div class="faq-a">No, <em>Who's Behind That?</em> does not use cookies. Instead, it uses your browser's local storage to keep track of an anonymous device identifier, your scan history, and your daily quota — all of which stay on your device and are never sent automatically with requests the way cookies are. There's no cross-site tracking and no third-party tracking technology involved.</div>
         </div>
       </div>
 
@@ -871,7 +888,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.10.2';
+const CLIENT_VERSION = '1.11.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
