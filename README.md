@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.12.1 — bug fix (client) | Server: v1.16.2 | Admin: v2.10.2
+- Added og:image:secure_url, og:image:type, and og:image:alt meta tags for better social platform scraper compatibility (LinkedIn, Facebook, Linktree)
+
 ### v1.12.0 (client) | Server: v1.16.2 | Admin: v2.10.2
 - Logo: network icon added to topbar brand
 - OG/Twitter meta tags added — logo appears as preview image on LinkedIn, Facebook, WhatsApp, Telegram, Slack, iMessage, Linktree, and any platform that reads Open Graph metadata
