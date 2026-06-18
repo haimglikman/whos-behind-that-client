@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.12.0 (client) | Server: v1.16.2 | Admin: v2.10.2
+- Logo: network icon added to topbar brand
+- OG/Twitter meta tags added — logo appears as preview image on LinkedIn, Facebook, WhatsApp, Telegram, Slack, iMessage, Linktree, and any platform that reads Open Graph metadata
+- Fixed citation markup appearing in actor bios
+
 ### v1.11.1 — bug fix (client) | Server: v1.16.1 | Admin: v2.10.1
 - Fixed server warm-up failing on iPhones with iOS versions before 16 — AbortSignal.timeout() is unsupported there, replaced with manual AbortController implementation
 
