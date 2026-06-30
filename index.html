@@ -328,6 +328,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 <div class="nav">
   <div class="nav-item active" id="nav-analyze" onclick="showPage('analyze',this)">Analyze</div>
   <div class="nav-item" id="nav-history" onclick="showPage('history',this)">My history</div>
+  <div class="nav-item" id="nav-investigate" onclick="showPage('investigate',this)">Investigate</div>
   <div class="nav-item" id="nav-faq" onclick="showPage('faq',this)">FAQ</div>
   <div class="nav-item" id="nav-about" onclick="showPage('about',this)">About</div>
 </div>
@@ -536,6 +537,26 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   </div>
 
   <!-- ── FAQ PAGE ── -->
+  <!-- ── INVESTIGATE PAGE ── -->
+  <div class="page" id="page-investigate">
+    <div class="history-main">
+      <div class="page-header">
+        <h1>Investigate</h1>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="margin-bottom:20px;opacity:0.35">
+          <circle cx="16" cy="24" r="6" stroke="var(--blue)" stroke-width="2.5"/>
+          <circle cx="36" cy="12" r="6" stroke="var(--blue)" stroke-width="2.5"/>
+          <circle cx="36" cy="36" r="6" stroke="var(--blue)" stroke-width="2.5"/>
+          <line x1="21.8" y1="21" x2="30.2" y2="14.8" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="21.8" y1="27" x2="30.2" y2="33.2" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:10px">Coming soon</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;max-width:280px">Cross-analyze multiple posts together to detect hidden narrative connections, coordination patterns, and shared framing across actors and time.</div>
+      </div>
+    </div>
+  </div>
+
   <div class="page" id="page-faq">
     <div class="about-main">
       <div class="page-header" style="margin-bottom:20px">
@@ -917,7 +938,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.12.1';
+const CLIENT_VERSION = '1.12.2';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1796,6 +1817,10 @@ function setMobileTab(name) {
   <button class="mobile-tab" id="mtab-history" onclick="showPage('history',document.getElementById('nav-history'));setMobileTab('history')">
     <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     History
+  </button>
+  <button class="mobile-tab" id="mtab-investigate" onclick="showPage('investigate',document.getElementById('nav-investigate'));setMobileTab('investigate')">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="7" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="17" r="2.5" stroke="currentColor" stroke-width="1.8"/><line x1="10.2" y1="10.8" x2="13.8" y2="8.2" stroke="currentColor" stroke-width="1.5"/><line x1="10.2" y1="13.2" x2="13.8" y2="15.8" stroke="currentColor" stroke-width="1.5"/></svg>
+    Investigate
   </button>
   <button class="mobile-tab" id="mtab-faq" onclick="showPage('faq',document.getElementById('nav-faq'));setMobileTab('faq')">
     <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 9.5a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg>
