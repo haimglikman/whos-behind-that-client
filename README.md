@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.12.2 (temporary client fix) | Server: v1.16.2
+- Added Investigate tab (between My history and FAQ) — shows "Coming soon" with a one-line description of the feature
+
 ### v1.12.1 — bug fix (client) | Server: v1.16.2 | Admin: v2.10.2
 - Added og:image:secure_url, og:image:type, and og:image:alt meta tags for better social platform scraper compatibility (LinkedIn, Facebook, Linktree)
 
