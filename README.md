@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.12.3 (client — live) | Server: v1.16.2
+- Added favicon — logo.png displayed as browser tab icon and in Google search results
+- Tab title changed from "Who's Behind That? — Client" to "Who's Behind That?"
+
 ### v1.12.2 (temporary client fix) | Server: v1.16.2
 - Added Investigate tab (between My history and FAQ) — shows "Coming soon" with a one-line description of the feature
 
