@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.12.4 (client — live) | Server: v1.16.2
+- Added meta description and Open Graph tags for better Google search appearance and social sharing previews
+
 ### v1.12.3 (client — live) | Server: v1.16.2
 - Added favicon — logo.png displayed as browser tab icon and in Google search results
 - Tab title changed from "Who's Behind That? — Client" to "Who's Behind That?"
