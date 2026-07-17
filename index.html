@@ -776,7 +776,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.16.1';
+const CLIENT_VERSION = '1.16.2';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -921,6 +921,27 @@ function extractHandle(url, post) {
   if (post && post.author) return post.author;
   return null;
 }
+// ─── ENTITY MANAGEMENT ───
+let _cachedEntities = null;
+
+function getEntities() {
+  return _cachedEntities || DEFAULT_ENTITIES;
+}
+
+async function loadEntitiesFromServer() {
+  try {
+    const res = await fetch(SERVER_URL + '/entities/list');
+    if (!res.ok) { console.warn('entities/list failed:', res.status); return; }
+    const data = await res.json();
+    if (data.success && Array.isArray(data.entities) && data.entities.length > 0) {
+      _cachedEntities = data.entities;
+      console.log('Entities loaded from server: ' + data.entities.length + ' entities, v' + data.version);
+    }
+  } catch(e) {
+    console.warn('Could not load entities from server:', e.message);
+  }
+}
+
 function generateScanId(srvVer) {
   const now = new Date();
   const date = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
@@ -1052,7 +1073,7 @@ async function analyzeWithManualText() {
   showLoader();
   document.getElementById('manual-fallback').style.display = 'none';
   try {
-    const entities = DEFAULT_ENTITIES;
+    const entities = getEntities();
     const steps = document.getElementById('loader-steps').querySelectorAll('.loader-step');
     const adv = function(i){ if(steps[i]){steps[i].classList.remove('active');steps[i].classList.add('done');steps[i].textContent='✓ '+LOAD_STEPS[i];} if(steps[i+1])steps[i+1].classList.add('active'); };
     adv(0); await delay(300); adv(1); await delay(300); adv(2);
@@ -1086,7 +1107,7 @@ function finishAnalysis(entry) {
 }
 
 async function performServerAnalysis(url) {
-  const entities = DEFAULT_ENTITIES;
+  const entities = getEntities();
   const steps = document.getElementById('loader-steps').querySelectorAll('.loader-step');
   const adv = function(i){ if(steps[i]){steps[i].classList.remove('active');steps[i].classList.add('done');steps[i].textContent='✓ '+LOAD_STEPS[i];} if(steps[i+1])steps[i+1].classList.add('active'); };
   adv(0);
@@ -1261,7 +1282,7 @@ async function checkConvergentInterest(postText, primaryMatches) {
   try {
     const res = await fetch(SERVER_URL + '/convergent-interest', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ postText, primaryMatches, allEntities: DEFAULT_ENTITIES })
+      body: JSON.stringify({ postText, primaryMatches, allEntities: getEntities() })
     });
     if (!res.ok) return;
     const data = await res.json();
@@ -2389,6 +2410,8 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   history.replaceState({ page: initPage }, '', '#' + initPage);
   startWarmup();
+  // Load entities from server on startup
+  loadEntitiesFromServer();
   // Close entity dropdown on outside click
   document.addEventListener('click', function(e) {
     const dd = document.getElementById('cf-entity-dropdown');
