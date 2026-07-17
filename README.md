@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.16.0 (client — live) | Server: v1.22.0 | Admin: v2.14.0
+- First live production release — based on client-dev v1.15.11
+- Tab title changed to "Who's Behind That?"
+- Points to live server (whos-behind-that-server.onrender.com)
+
 ### v1.12.4 (client — live) | Server: v1.16.2
 - Added meta description and Open Graph tags for better Google search appearance and social sharing previews
 
