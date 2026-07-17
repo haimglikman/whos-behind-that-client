@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.16.2 (client) | Server: v1.22.1 | Admin: v2.14.2
+- Entities now loaded from server DB on page load — always uses latest version set by admin
+- Falls back to DEFAULT_ENTITIES if server unreachable
+
 ### v1.16.1 — bug fix (client — live) | Server: v1.22.0 | Admin: v2.14.1
 - Added favicon — logo.png now shows as tab icon
 
