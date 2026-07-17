@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.16.1 — bug fix (client — live) | Server: v1.22.0 | Admin: v2.14.1
+- Added favicon — logo.png now shows as tab icon
+
 ### v1.16.0 (client — live) | Server: v1.22.0 | Admin: v2.14.0
 - First live production release — based on client-dev v1.15.11
 - Tab title changed to "Who's Behind That?"
