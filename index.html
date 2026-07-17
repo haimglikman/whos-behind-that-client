@@ -4,15 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Who's Behind That?</title>
-<meta name="description" content="Who's Behind That? — AI tool for detecting narrative manipulation and coordinated framing in social media and news content.">
-<meta property="og:title" content="Who's Behind That?">
-<meta property="og:description" content="AI tool for detecting narrative manipulation and coordinated framing in social media and news content.">
-<meta property="og:url" content="https://whosbehindthat.com">
-<meta property="og:image" content="https://whosbehindthat.com/logo.png">
-<meta property="og:type" content="website">
-<link rel="icon" type="image/png" href="logo.png">
-<link rel="apple-touch-icon" href="logo.png">
-
+  <meta name="description" content="AI-powered narrative intelligence tool. Uncover the hidden interests behind social media posts and news articles.">
+  <meta property="og:title" content="Who's Behind That?">
+  <meta property="og:description" content="AI-powered narrative intelligence tool. Uncover the hidden interests behind social media posts and news articles.">
   <meta property="og:image" content="https://whosbehindthat.com/logo.png">
   <meta property="og:image:secure_url" content="https://whosbehindthat.com/logo.png">
   <meta property="og:image:type" content="image/png">
@@ -325,7 +319,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   </div>
   <div class="topbar-right">
     <span class="topbar-desktop-only">Powered by Claude AI</span>
-    <span id="app-ver-topbar" class="topbar-mobile-only">app v1.9.2</span>
+    <span id="app-ver-topbar" class="topbar-mobile-only">app v—</span>
     <span id="srv-ver-topbar" class="topbar-mobile-only">srv —</span>
   </div>
 </div>
@@ -333,8 +327,9 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 <!-- NAV -->
 <div class="nav">
   <div class="nav-item active" id="nav-analyze" onclick="showPage('analyze',this)">Analyze</div>
-  <div class="nav-item" id="nav-history" onclick="showPage('history',this)">My history</div>
-  <div class="nav-item" id="nav-investigate" onclick="showPage('investigate',this)">Investigate</div>
+  <div class="nav-item" id="nav-history" onclick="showPage('history',this)">Post history</div>
+  <div class="nav-item" id="nav-investigate" onclick="showPage('investigate',this)">Investigate<span id="client-investigate-count" style="display:none;background:var(--blue);color:#fff;border-radius:99px;font-size:9px;padding:1px 6px;margin-left:4px;font-weight:700"></span></div>
+  <div class="nav-item" id="nav-clusters" onclick="showPage('clusters',this)">Clusters history</div>
   <div class="nav-item" id="nav-faq" onclick="showPage('faq',this)">FAQ</div>
   <div class="nav-item" id="nav-about" onclick="showPage('about',this)">About</div>
 </div>
@@ -406,9 +401,11 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           </div>
           <span class="result-url" id="result-url" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
           <button id="jump-url-btn" class="btn-primary btn-sm" onclick="jumpToUrl()" style="display:none">↗ Open post</button>
+          <button id="add-investigate-btn" class="btn-primary btn-sm" onclick="addCurrentToInvestigation()" style="display:none;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,107,255,.2)">+ Investigate</button>
           <button id="clear-url-btn" class="btn btn-sm" onclick="resetAnalysis()" style="display:none;background:var(--bg2);color:var(--text3);border-color:var(--border)">✕ Clear</button>
         </div>
         <div id="result-post-text" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.7;font-weight:500;white-space:pre-wrap;word-break:break-word"></div>
+        <div id="result-video-note" style="display:none;font-size:11px;color:var(--text3);font-style:italic;padding:6px 10px;background:var(--bg2);border-radius:var(--radius-xs);margin-bottom:8px"></div>
 
         <!-- Overall score card -->
         <div class="card">
@@ -478,10 +475,78 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   <div class="page" id="page-history">
     <div class="history-main">
       <div class="page-header">
-        <h1>My history</h1>
+        <h1>Post history</h1>
         <p>Your personal scan history — visible only to you</p>
       </div>
+
+      <!-- History filters -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;align-items:flex-end">
+          <div style="flex:1;min-width:120px;max-width:160px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Search by ID</div><input type="text" class="url-input" style="height:32px;font-size:11px;width:100%" id="cf-scan-id" placeholder="WBT-..." oninput="applyClientFilters()"/></div>
+          <div style="flex:1;min-width:120px;max-width:160px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">URL</div><input type="text" class="url-input" style="height:32px;font-size:11px;width:100%" id="cf-url" placeholder="x.com/..." oninput="applyClientFilters()"/></div>
+          <div style="flex:0 0 130px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Source</div>
+            <select class="url-input" style="height:32px;font-size:11px;padding:0 8px" id="cf-platform" onchange="applyClientFilters()">
+              <option value="">All</option>
+              <option value="x">X</option>
+              <option value="instagram">Instagram</option>
+              <option value="facebook">Facebook</option>
+              <option value="youtube">YouTube</option>
+            </select>
+          </div>
+          <div style="flex:0 0 130px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Date from</div><input type="date" class="url-input" style="height:32px;font-size:11px" id="cf-date-from" onchange="applyClientFilters()"/></div>
+          <div style="flex:0 0 130px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Date to</div><input type="date" class="url-input" style="height:32px;font-size:11px" id="cf-date-to" onchange="applyClientFilters()"/></div>
+          <div style="flex:1;min-width:140px;max-width:180px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Entity match</div>
+            <div style="position:relative">
+              <input type="text" class="url-input" style="height:32px;font-size:11px;width:100%" id="cf-entity" placeholder="type to filter..." oninput="filterClientEntityOptions()" onfocus="filterClientEntityOptions()" autocomplete="off"/>
+              <div id="cf-entity-dropdown" style="display:none;position:absolute;top:34px;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);z-index:50;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.08)"></div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:120px;max-width:160px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Actor</div>
+            <select class="url-input" style="height:32px;font-size:11px;padding:0 8px;width:100%" id="cf-actor" onchange="applyClientFilters()">
+              <option value="">All</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn-primary btn-sm" style="background:none;color:var(--text3);border:1.5px solid var(--border);font-size:11px" onclick="clearClientFilters()">Clear</button>
+          <span style="font-size:11px;color:var(--text3)" id="cf-count"></span>
+        </div>
+      </div>
+
+      <!-- Pending investigation banner -->
+      <div id="client-pending-banner" style="display:none;background:var(--blue-dim);border:1px solid rgba(26,107,255,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-size:12px;font-weight:700;color:var(--blue)" id="client-pending-text">0 posts pending investigation</span>
+          <button class="btn-primary btn-sm" style="margin-left:auto;font-size:11px" onclick="openAndRunClientInvestigation()">Run investigation →</button>
+          <button class="btn-primary btn-sm" style="background:none;color:var(--text3);border:1.5px solid var(--border);font-size:11px" onclick="clearClientInvestigation()">Clear</button>
+        </div>
+        <div id="client-pending-basket-list"></div>
+      </div>
+
       <div id="history-list"></div>
+    </div>
+  </div>
+
+  <!-- ── INVESTIGATE PAGE ── -->
+  <div class="page" id="page-investigate">
+    <div class="history-main">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div>
+          <h1>Investigate</h1>
+          <p>Cross-analyze posts to detect connections and narrative patterns</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary btn-sm" style="background:none;color:var(--text3);border:1.5px solid var(--border);font-size:11px" onclick="clearClientInvestigation()">Clear all</button>
+          <button class="btn-primary btn-sm" id="client-run-btn" onclick="runClientInvestigation()" style="font-size:12px">✦ Run investigation</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-label">Posts in basket (<span id="client-basket-count">0</span>)</div>
+        <div id="client-basket-list"><div style="font-size:12px;color:var(--text3);padding:6px 0">No posts added yet. Add posts from Post history or from a scan result.</div></div>
+      </div>
+
+      <div id="client-investigate-results"></div>
     </div>
   </div>
 
@@ -543,23 +608,14 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   </div>
 
   <!-- ── FAQ PAGE ── -->
-  <!-- ── INVESTIGATE PAGE ── -->
-  <div class="page" id="page-investigate">
+  <!-- ── CLUSTERS HISTORY PAGE ── -->
+  <div class="page" id="page-clusters">
     <div class="history-main">
       <div class="page-header">
-        <h1>Investigate</h1>
+        <h1>Clusters history</h1>
+        <p>Previous investigation results saved across sessions</p>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" style="margin-bottom:20px;opacity:0.35">
-          <circle cx="16" cy="24" r="6" stroke="var(--blue)" stroke-width="2.5"/>
-          <circle cx="36" cy="12" r="6" stroke="var(--blue)" stroke-width="2.5"/>
-          <circle cx="36" cy="36" r="6" stroke="var(--blue)" stroke-width="2.5"/>
-          <line x1="21.8" y1="21" x2="30.2" y2="14.8" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
-          <line x1="21.8" y1="27" x2="30.2" y2="33.2" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:10px">Coming soon</div>
-        <div style="font-size:13px;color:var(--text2);line-height:1.7;max-width:280px">Cross-analyze multiple posts together to detect hidden narrative connections, coordination patterns, and shared framing across actors and time.</div>
-      </div>
+      <div id="client-clusters-list"><div style="font-size:12px;color:var(--text3);padding:20px 0">Loading...</div></div>
     </div>
   </div>
 
@@ -568,235 +624,9 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
       <div class="page-header" style="margin-bottom:20px">
         <h1>FAQ</h1>
       </div>
-
-      <div class="faq-group">
-        <div class="faq-group-label">Terminology</div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What is an entity?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">An entity is any political actor, organization, government, movement, or ideological group whose interests the tool tracks. Examples include Benjamin Netanyahu, The Palestinian Authority, The US government, the IDF, or the Israeli protest movement. Each entity has a defined profile — their known interests, tactics, and public narrative — that the AI uses to score whether a given post serves their agenda.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What is an actor?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">An actor is the person or account behind a specific post — the author. When you research an actor, <em>Who's Behind That?</em> builds a profile of who they are: their background, known affiliations, political stance, and online presence. For news articles, actor research also profiles the publication itself — its editorial line, ownership, and known biases.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What is primary vs secondary alignment?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Primary alignment means the post actively serves an entity's interests — its framing, message, or targets work in their favor. Secondary alignment means the entity benefits indirectly — the post wasn't necessarily crafted for them, but spreading it helps them nonetheless. Think of primary as "this post works for them" and secondary as "they'd be happy this post exists." Important to note: alignment does not mean the post was commissioned by the entity, that the author works for them, or that there's any direct connection — it simply reflects whose interests the content serves, intentionally or not.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What is Hidden Convergent Interest?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Hidden Convergent Interest is when two entities that are normally on opposite sides of the conflict both benefit from the same post — even if neither is the obvious intended audience. It reflects the idea that in a complex political landscape, a single piece of content can serve multiple agendas simultaneously, sometimes in ways that aren't immediately obvious. When <em>Who's Behind That?</em> detects this, it flags it as a separate finding so you can see not just who the post was likely written for, but also who quietly benefits from it being spread.</div>
-        </div>
-      </div>
-
-      <div class="faq-group">
-        <div class="faq-group-label">Scanning logic</div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>How does post scanning work?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">When you submit a URL, the server automatically fetches the text of the post or article. That text is then analyzed by Claude AI, which scores it against all entities in the database simultaneously. Each entity is evaluated based on whether the post advances their strategic interests, matches their known methods, and echoes their public narrative. The highest-scoring entities above the threshold appear as primary or secondary alignments.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>How does actor scanning work?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">After a successful post scan, you're offered the option to research the account or author behind it. The server looks up publicly available information about them — their background, known affiliations, political stance, and online presence. For news articles, it also profiles the publication: its editorial line, ownership, and known biases. Results are generally accurate for well-known public figures but may be limited for anonymous or low-profile accounts.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Does the scan consider context beyond the post text?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Each scan is based solely on the post or article being analyzed — it is not influenced by the author's other posts, past scans, or any external context outside of what's in the text itself. That said, the engine considers two dimensions within the post: what it says (content) and who it attacks (context). If a post directly attacks a named political figure, the engine identifies who benefits from that attack and factors that into the score. Actor research is separate — it adds background on the author for your own interpretation, but does not feed back into the post's scoring.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Can you scan an actor without scanning a post first?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Not currently — actor research is triggered from a post scan result. This is intentional: <em>Who's Behind That?</em> is designed to analyze how content is framed, not to investigate individuals in isolation. The actor profile provides useful background for interpreting a specific scan, but the post itself is always the starting point.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Why do some posts score 0%?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">A zero score means the AI found no meaningful alignment with any entity above the detection threshold. This can happen when a post is genuinely neutral or factual, when the content is too vague or short to score reliably, or occasionally when the model misses context it should have caught — particularly for posts that rely heavily on irony, cultural shorthand, or implicit references. If you believe a zero result is wrong, feel free to contact us.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What does the score percentage mean?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">The score reflects how strongly a post serves a given entity's interests, on a scale of 0 to 100. It combines three factors: strategic interest alignment, tactical fingerprint, and narrative echo. Only entities scoring above 85% appear in your results — below that threshold the signal is considered too weak to be meaningful.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What's the difference between scanning a social media post and a news article?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Both are analyzed the same way — the text is scored against the entity database to detect whose narrative it serves. The difference is in what you're measuring: a social media post reflects what an individual chose to say and how they framed it; a news article reflects how a publication chose to cover a story, what angle it took, and what it emphasized or left out. Both are valid and meaningful signals.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>I think the scan results were wrong</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">AI scoring is imperfect. The model may miss context, misread sarcasm, or fail to identify an indirect beneficiary — especially for posts that are ambiguous, highly local, or rely on cultural knowledge. If you consistently see wrong results for a certain type of post, you can contact us — it helps improve the model.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Are the entities interchangeable?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Yes — the entity database is designed to evolve with the political landscape. Entities can be added, edited, split, or removed to reflect new developments, shifting alliances, emerging figures, or entirely new topics. The database is versioned, so you can always see which version was used for any given scan.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>How up to date is the entity database?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">The database is updated periodically to reflect the current political landscape — new parties, splits, emerging figures, and shifting alliances. Each version is numbered, and every scan records which database version was used, so you can always trace results back to the entity set that produced them.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Can <em>Who's Behind That?</em> work for other topics?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Yes — in principle the tool can be adapted to any topic where narrative alignment matters. Currently it's built specifically for the Israeli-Palestinian conflict and Israeli domestic politics, and the results are most reliable within that scope. Applying it to other conflicts or political landscapes would require building a dedicated entity database for that domain, which is something we're open to exploring.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Are the entities static or dynamic?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">The entity database is reviewed on a weekly basis and updated when meaningful developments occur — such as election results, shifting alliances, new political figures, or major strategic changes. Minor day-to-day news doesn't trigger updates; only changes that genuinely affect an entity's interests or behavior do.</div>
-        </div>
-
-      </div>
-
-      <div class="faq-group">
-        <div class="faq-group-label">Technical</div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What languages are supported?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Posts in Hebrew and Arabic are automatically detected and pre-translated before scoring, with political context extracted as part of the process. English posts are scored directly. Other languages may work but results are less reliable.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>What platforms are supported? Does scanning work the same for all?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a"><em>Who's Behind That?</em> supports posts from X (Twitter), Facebook, and Instagram, as well as articles from major news and media websites including Ynet, Haaretz, Times of Israel, BBC, Al Jazeera, New York Times, and many others. The analysis itself works the same way across all platforms — once the text is retrieved, it goes through the same scoring process regardless of source. That said, every platform is built differently, and some are more restrictive than others when it comes to automated access. If scanning from a particular platform doesn't work, manually copying and pasting the text is always an option.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>I got an error when trying to scan a post</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a"><em>Who's Behind That?</em> can only access publicly available content. Private social media posts, friends-only content, closed groups, and articles behind a paywall cannot be fetched — in those cases, you can paste the text manually instead. For Facebook and Instagram specifically, automated access is sometimes temporarily blocked by the platform — copying and pasting the post text manually is the best workaround. If the server is waking up from sleep, waiting 30 seconds and trying again usually resolves the issue.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Does actor scanning count toward my daily quota?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Yes — each actor research uses one of your daily credits, the same as a post scan. This is because it involves an AI call which has a real cost.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Can <em>Who's Behind That?</em> integrate with other platforms via API?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">We'd love to make that possible. API access isn't available yet — the tool is currently a web app only — but if you're interested in integration for research, journalism, or institutional use, we'd be happy to hear from you at <a href="mailto:contact@whosbehindthat.com">contact@whosbehindthat.com</a>.</div>
-        </div>
-      </div>
-
-      <div class="faq-group">
-        <div class="faq-group-label">Privacy</div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Is login or identification required?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">No login, account, or registration is required. <em>Who's Behind That?</em> uses a randomly generated device identifier stored in your browser to track your daily scan quota and link your local history — nothing more. There is no user profile, no email address, and no authentication of any kind. You can start scanning immediately.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Is <em>Who's Behind That?</em> free?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Yes — <em>Who's Behind That?</em> is free to use during the beta period. There are no subscription fees, no payment required, and no premium tier. The tool is currently limited to 10 scans per day per device to manage API costs, but this limit may be adjusted in future versions. If you need higher usage for research or institutional purposes, contact us at <a href="mailto:contact@whosbehindthat.com">contact@whosbehindthat.com</a>.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Can someone know what I scanned for?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">Your scan history is stored locally on your device and is private to you. The service operator (<em>Who's Behind That?</em>) can see anonymized scan data — the post URL, content, and results — linked only to a randomly generated device identifier. No personal information is collected or visible to us: no IP address, no email, no device identifiers such as MAC address, and no account information of any kind. Your scans are never shared with third parties.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Is my data used to train AI models?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">No. Your scan data is not used to train Claude or any other AI model. Post text is sent to Anthropic's Claude API for analysis and is subject to Anthropic's privacy policy, but <em>Who's Behind That?</em> does not share your data for training purposes.</div>
-        </div>
-
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
-            <span>Does <em>Who's Behind That?</em> use cookies?</span>
-            <span class="faq-chevron">▸</span>
-          </div>
-          <div class="faq-a">No, <em>Who's Behind That?</em> does not use cookies. Instead, it uses your browser's local storage to keep track of an anonymous device identifier, your scan history, and your daily quota — all of which stay on your device and are never sent automatically with requests the way cookies are. There's no cross-site tracking and no third-party tracking technology involved.</div>
-        </div>
-      </div>
-
+      <div id="faq-dynamic-list"><div style="font-size:12px;color:var(--text3);padding:20px 0">Loading...</div></div>
     </div>
   </div>
-
 </div><!-- end layout -->
 
 <!-- BOTTOM BAR -->
@@ -944,7 +774,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.12.4';
+const CLIENT_VERSION = '1.16.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1014,7 +844,10 @@ function showPage(name, el) {
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   document.getElementById('page-' + name).classList.add('active');
   if (el) el.classList.add('active');
-  if (name === 'history') renderHistory();
+  if (name === 'history') { renderHistory(); applyClientFilters(); }
+  if (name === 'investigate') { updateClientInvestigateUI(); }
+  if (name === 'clusters') { renderClientClusters(); }
+  if (name === 'faq') { renderClientFaq(); }
   if (history.state && history.state.page !== name) {
     history.pushState({ page: name }, '', '#' + name);
   }
@@ -1031,7 +864,10 @@ window.addEventListener('popstate', function(e) {
   const pageEl = document.getElementById('page-' + name);
   if (pageEl) pageEl.classList.add('active');
   if (el) el.classList.add('active');
-  if (name === 'history') renderHistory();
+  if (name === 'history') { renderHistory(); applyClientFilters(); }
+  if (name === 'investigate') { updateClientInvestigateUI(); }
+  if (name === 'clusters') { renderClientClusters(); }
+  if (name === 'faq') { renderClientFaq(); }
   setMobileTab(name);
 });
 
@@ -1154,6 +990,14 @@ function jumpToUrl() {
   if (url) window.open(url, '_blank', 'noopener');
 }
 
+function addCurrentToInvestigation() {
+  const scanId = document.getElementById('result-scan-id') ? document.getElementById('result-scan-id').textContent : '';
+  if (!scanId) { toast('No scan ID available.'); return; }
+  addToClientInvestigation(scanId);
+  const btn = document.getElementById('add-investigate-btn');
+  if (btn) { btn.textContent = '✓ Added'; btn.style.background = 'var(--blue)'; btn.style.color = '#fff'; }
+}
+
 function resetAnalysis() {
   hideError();
   document.getElementById('loader').classList.remove('active');
@@ -1162,6 +1006,8 @@ function resetAnalysis() {
   if (headerRow) headerRow.style.display = 'none';
   const clearBtn = document.getElementById('clear-url-btn');
   if (clearBtn) clearBtn.style.display = 'none';
+  const invBtn = document.getElementById('add-investigate-btn');
+  if (invBtn) invBtn.style.display = 'none';
   document.getElementById('url-input').value = '';
   document.getElementById('post-text').value = '';
   document.getElementById('manual-fallback').style.display = 'none';
@@ -1234,7 +1080,7 @@ function finishAnalysis(entry) {
     showResults(entry.url || '', entry.fullResult);
   }
   const scanId = entry ? entry.scanId : '';
-  toastLong('Analysis complete — saved to My history' + (scanId ? ' · ' + scanId : ''));
+  toastLong('Analysis complete — saved to Post history' + (scanId ? ' · ' + scanId : ''));
 }
 
 async function performServerAnalysis(url) {
@@ -1251,6 +1097,7 @@ async function performServerAnalysis(url) {
   const data = await res.json();
   const finalUrl = data.url || url;
   const result = buildResult(data.analysis, data.post, entities);
+  if (data.post && data.post.videoNote) result.videoNote = data.post.videoNote;
   const entry = await saveToHistory(finalUrl, (data.post&&data.post.text)||'', result, null).catch(function(e){ console.warn('History save error:', e.message); });
   incrementScanCount();
   finishAnalysis(entry);
@@ -1300,9 +1147,15 @@ function showResults(url, d) {
   if (scanIdBox) scanIdBox.style.display = scanId ? 'flex' : 'none';
   const jumpBtn = document.getElementById('jump-url-btn');
   if (jumpBtn) jumpBtn.style.display = url ? 'inline-flex' : 'none';
+  const invBtn = document.getElementById('add-investigate-btn');
+  if (invBtn) { invBtn.style.display = scanId ? 'inline-flex' : 'none'; invBtn.textContent = '+ Investigate'; invBtn.style.background = 'var(--blue-dim)'; invBtn.style.color = 'var(--blue)'; }
   const clearBtn = document.getElementById('clear-url-btn');
   if (clearBtn) clearBtn.style.display = 'inline-flex';
   currentResult = Object.assign({url:url}, d);
+
+  // Video note (if article had embedded video with no transcript)
+  const noteEl = document.getElementById('result-video-note');
+  if (noteEl) { noteEl.textContent = d.videoNote || ''; noteEl.style.display = d.videoNote ? 'block' : 'none'; }
 
   // Dial
   const pct = d.overall.score||0;
@@ -1555,6 +1408,12 @@ async function saveToHistory(url, postText, result, srvVer) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(Object.assign({}, entry, { id: scanId }))
   }).catch(function(e){ console.warn('Server history save failed:', e.message); });
+  // Reset entity dropdown so new entities appear immediately
+  const dd = document.getElementById('cf-entity-dropdown');
+  if (dd) dd.dataset.built = '';
+  // Reset source dropdown so new news domains appear immediately
+  const ssel = document.getElementById('cf-platform');
+  if (ssel) { const cur = ssel.value; ssel.innerHTML = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="youtube">YouTube</option>'; if (cur) ssel.value = cur; }
   return entry;
 }
 
@@ -1658,7 +1517,7 @@ function renderHistory() {
   const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', news:'📰', unknown:'🔗'};
   list.innerHTML = h.map(function(e) {
     const d = new Date(e.ts);
-    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const dateStr = d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     const scanId = e.scanId || ('WBT-legacy-' + e.id);
     const icon = platformIcon[e.platform||'unknown']||'🔗';
     if (e.failed) {
@@ -1698,13 +1557,784 @@ function renderHistory() {
         '</div>' +
       '</div>' +
       '<textarea class="comment-field" placeholder="Add a note..." onclick="event.stopPropagation()" onchange="saveComment(\'' + escHtml(scanId) + '\',this.value)">' + escHtml(e.comment||'') + '</textarea>' +
+      '<div style="margin-top:8px;display:flex;justify-content:flex-end">' +
+        '<button style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,107,255,.2);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans)" onclick="event.stopPropagation();addToClientInvestigation(\'' + escHtml(scanId) + '\')" id="inv-btn-' + escHtml(scanId) + '">' +
+          (getClientBasket().find(function(b){ return b.scanId === scanId; }) ? '✓ Added' : '+ Investigate') +
+        '</button>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
 
-// ─────────────────────────────────────────────
-// STATUS BAR
-// ─────────────────────────────────────────────
+// ─── CLIENT DOMAIN NAMES ───
+const DOMAIN_NAMES = {
+  'ynet.co.il':'Ynet','ynetnews.com':'Ynet','haaretz.co.il':'Haaretz','haaretz.com':'Haaretz',
+  'israelhayom.co.il':'Israel Hayom','timesofisrael.com':'Times of Israel','jpost.com':'Jerusalem Post',
+  'mako.co.il':'Mako','n12.co.il':'N12','kan.org.il':'Kan','walla.co.il':'Walla','maariv.co.il':'Maariv',
+  'calcalist.co.il':'Calcalist','globes.co.il':'Globes','channel14.co.il':'Channel 14','i24news.tv':'i24 News',
+  '972mag.com':'972 Magazine','bbc.com':'BBC','bbc.co.uk':'BBC','reuters.com':'Reuters',
+  'apnews.com':'AP News','nytimes.com':'New York Times','washingtonpost.com':'Washington Post',
+  'theguardian.com':'The Guardian','aljazeera.com':'Al Jazeera','cnn.com':'CNN',
+  'foxnews.com':'Fox News','wsj.com':'Wall Street Journal','ft.com':'Financial Times',
+  'middleeasteye.net':'Middle East Eye','axios.com':'Axios','bloomberg.com':'Bloomberg',
+  'politico.com':'Politico','thehill.com':'The Hill',
+};
+function getDomainDisplayName(url) {
+  try { const d = new URL(url).hostname.replace(/^www\./,''); return DOMAIN_NAMES[d] || d; } catch(e) { return url; }
+}
+
+// ─── CLIENT FILTERS ───
+function applyClientFilters() {
+  const h = getHistory();
+  const scanId = (document.getElementById('cf-scan-id')||{value:''}).value.trim().toLowerCase();
+  const urlF = (document.getElementById('cf-url')||{value:''}).value.trim().toLowerCase();
+  const source = (document.getElementById('cf-platform')||{value:''}).value;
+  const dateFrom = (document.getElementById('cf-date-from')||{value:''}).value;
+  const dateTo = (document.getElementById('cf-date-to')||{value:''}).value;
+  const entity = (document.getElementById('cf-entity')||{value:''}).value.trim().toLowerCase();
+  const actor = (document.getElementById('cf-actor')||{value:''}).value.trim().toLowerCase().replace(/^@/,'');
+
+  // Populate source dropdown
+  const ssel = document.getElementById('cf-platform');
+  if (ssel) {
+    const curVal = ssel.value;
+    const newsDomains = {};
+    h.forEach(function(e) {
+      if (e.platform === 'news' && e.url) {
+        try { const d = new URL(e.url).hostname.replace(/^www\./,''); newsDomains[d] = getDomainDisplayName(e.url); } catch(err) {}
+      }
+    });
+    const staticOpts = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="youtube">YouTube</option>';
+    const newsOpts = Object.keys(newsDomains).sort().map(function(d){ return '<option value="news:'+d+'">'+escHtml(newsDomains[d])+'</option>'; }).join('');
+    ssel.innerHTML = staticOpts + (newsOpts ? '<optgroup label="News sites">' + newsOpts + '</optgroup>' : '');
+    if (curVal) ssel.value = curVal;
+  }
+
+  // Populate actor dropdown from researched actors
+  const actorSel = document.getElementById('cf-actor');
+  if (actorSel && actorSel.options.length <= 1) {
+    const actors = getActors();
+    Object.keys(actors).sort().forEach(function(k) {
+      const a = actors[k];
+      const label = (a.handle || a.name || k).slice(0, 40);
+      const opt = document.createElement('option');
+      opt.value = k.toLowerCase();
+      opt.textContent = label;
+      actorSel.appendChild(opt);
+    });
+  }
+
+  const actors = getActors();
+  const filtered = h.filter(function(e) {
+    if (scanId && !(e.scanId||'').toLowerCase().includes(scanId)) return false;
+    if (urlF && !(e.url||'').toLowerCase().includes(urlF)) return false;
+    if (source) {
+      if (source.startsWith('news:')) {
+        const domain = source.slice(5);
+        try { const d = new URL(e.url||'').hostname.replace(/^www\./,''); if (d !== domain) return false; } catch(err) { return false; }
+      } else {
+        if ((e.platform||'unknown') !== source) return false;
+      }
+    }
+    if (dateFrom && new Date(e.ts) < new Date(dateFrom)) return false;
+    if (dateTo && new Date(e.ts) > new Date(dateTo + 'T23:59:59')) return false;
+    if (entity) {
+      const inTop = (e.topMatches||[]).some(function(m){ return m.toLowerCase().startsWith(entity); });
+      const inFull = e.fullResult && (e.fullResult.matches||[]).some(function(m){ return (m.name||'').toLowerCase().startsWith(entity); });
+      if (!inTop && !inFull) return false;
+    }
+    if (actor) {
+      const actorKey2 = Object.keys(getActors()).find(function(k){ return k.toLowerCase() === actor || k.toLowerCase().includes(actor); });
+      if (!actorKey2) return false;
+    }
+    return true;
+  });
+  const countEl = document.getElementById('cf-count');
+  if (countEl) countEl.textContent = filtered.length + ' of ' + h.length;
+  renderClientHistoryList(filtered);
+}
+
+function filterClientEntityOptions() {
+  const input = document.getElementById('cf-entity');
+  const dropdown = document.getElementById('cf-entity-dropdown');
+  if (!input || !dropdown) return;
+  const q = input.value.trim().toLowerCase();
+  // Build entity list from history on first call or when empty
+  if (!dropdown.dataset.built) {
+    const h = getHistory();
+    const entities = [...new Set(h.flatMap(function(e){ return e.topMatches||[]; }))].sort();
+    dropdown.innerHTML = entities.map(function(e){
+      return '<div class="entity-option" data-name="' + escHtml(e) + '" style="padding:6px 10px;font-size:12px;cursor:pointer;color:var(--text)" onclick="selectClientEntity(\'' + escHtml(e).replace(/'/g,"&#39;") + '\')" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'">' + escHtml(e) + '</div>';
+    }).join('');
+    dropdown.dataset.built = '1';
+  }
+  dropdown.querySelectorAll('.entity-option').forEach(function(opt){
+    opt.style.display = (!q || opt.dataset.name.toLowerCase().startsWith(q)) ? '' : 'none';
+  });
+  dropdown.style.display = 'block';
+  applyClientFilters();
+}
+
+function selectClientEntity(name) {
+  const input = document.getElementById('cf-entity');
+  const dropdown = document.getElementById('cf-entity-dropdown');
+  if (input) input.value = name;
+  if (dropdown) dropdown.style.display = 'none';
+  applyClientFilters();
+}
+
+function clearClientFilters() {
+  ['cf-scan-id','cf-url','cf-date-from','cf-date-to'].forEach(function(id){ const el=document.getElementById(id); if(el) el.value=''; });
+  const ssel = document.getElementById('cf-platform'); if (ssel) ssel.value = '';
+  const asel = document.getElementById('cf-actor'); if (asel) { asel.value = ''; asel.innerHTML = '<option value="">All</option>'; }
+  const dd = document.getElementById('cf-entity-dropdown'); if (dd) { dd.style.display='none'; dd.dataset.built=''; }
+  const inp = document.getElementById('cf-entity'); if (inp) inp.value = '';
+  applyClientFilters();
+}
+function renderClientHistoryList(entries) {
+  const list = document.getElementById('history-list');
+  if (!entries || entries.length === 0) { list.innerHTML = '<div class="no-history">No scans match your filters.</div>'; return; }
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', news:'📰', unknown:'🔗'};
+  const h = getHistory();
+  list.innerHTML = entries.map(function(e) {
+    const d = new Date(e.ts);
+    const dateStr = d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const scanId = e.scanId || ('WBT-legacy-' + e.id);
+    const icon = platformIcon[e.platform||'unknown']||'🔗';
+    if (e.failed) {
+      return '<div class="history-item" style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.03)">' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span>' + icon + '</span><span class="scan-id">' + escHtml(scanId) + '</span><span style="font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-left:4px">Failed</span></div>' +
+        '<div class="history-url">' + escHtml(e.url) + '</div>' +
+        '<div class="history-time">' + dateStr + '</div>' +
+        '<div style="font-size:11px;color:var(--red);margin-top:6px;line-height:1.5;user-select:text">⚠ ' + escHtml(e.errorMsg||'Unknown error') + '</div>' +
+      '</div>';
+    }
+    const color = alignmentColor(e.overallScore);
+    const hasResult = !!e.fullResult;
+    return '<div class="history-item">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px"><div style="display:flex;align-items:center;gap:6px"><span>' + icon + '</span><span class="scan-id">' + escHtml(scanId) + '</span></div><span class="scan-version">' + escHtml(e.appVersion||'?') + ' / srv ' + escHtml(e.serverVersion||'?') + '</span></div>' +
+      '<div style="cursor:pointer" onclick="openHistoryEntry(' + e.id + ')">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span class="history-url">' + escHtml(e.url) + '</span><span class="history-score" style="color:' + color + ';flex-shrink:0">' + e.overallScore + '%</span></div>' +
+        '<div class="history-time">' + dateStr + '</div>' +
+        (e.postText ? '<div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5;font-weight:500">"' + escHtml(e.postText.slice(0,140)) + (e.postText.length>140?'…':'') + '"</div>' : '') +
+        '<div class="history-tags" style="margin-top:6px"><span class="history-tag" style="color:' + color + ';border-color:' + color + '33">' + escHtml(e.overallLabel) + '</span>' + (e.topMatches||[]).map(function(m){ return '<span class="history-tag">' + escHtml(m) + '</span>'; }).join('') + (hasResult ? '<span class="history-tag" style="margin-left:auto;color:var(--text3)">view →</span>' : '') + '</div>' +
+      '</div>' +
+      '<textarea class="comment-field" placeholder="Add a note..." onclick="event.stopPropagation()" onchange="saveComment(\'' + escHtml(scanId) + '\',this.value)">' + escHtml(e.comment||'') + '</textarea>' +
+      '<div style="margin-top:8px;display:flex;justify-content:flex-end"><button style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(26,107,255,.2);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans)" onclick="event.stopPropagation();addToClientInvestigation(\'' + escHtml(scanId) + '\')" id="inv-btn-' + escHtml(scanId) + '">' + (getClientBasket().find(function(b){ return b.scanId === scanId; }) ? '✓ Added' : '+ Investigate') + '</button></div>' +
+    '</div>';
+  }).join('');
+}
+
+// ─── CLIENT INVESTIGATION BASKET ───
+function getClientBasket() { try { return JSON.parse(localStorage.getItem('wbt_client_investigate') || '[]'); } catch(e) { return []; } }
+function saveClientBasket(b) { localStorage.setItem('wbt_client_investigate', JSON.stringify(b)); updateClientInvestigateUI(); }
+function updateClientInvestigateUI() {
+  const basket = getClientBasket();
+  const countEl = document.getElementById('client-investigate-count');
+  const basketCount = document.getElementById('client-basket-count');
+  const banner = document.getElementById('client-pending-banner');
+  const text = document.getElementById('client-pending-text');
+  const listEl = document.getElementById('client-pending-basket-list');
+  if (countEl) { countEl.textContent = basket.length; countEl.style.display = basket.length > 0 ? 'inline-block' : 'none'; }
+  if (basketCount) basketCount.textContent = basket.length;
+  if (banner) banner.style.display = basket.length > 0 ? 'block' : 'none';
+  if (text) text.textContent = basket.length + ' post' + (basket.length > 1 ? 's' : '') + ' pending investigation';
+  if (listEl) {
+    listEl.innerHTML = basket.map(function(p) {
+      const d = p.ts ? new Date(p.ts) : null;
+      const dateStr = d ? d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+      const primary = (p.topMatches||[])[0] || '—';
+      const secondary = (p.topMatches||[])[1] || '';
+      return '<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-top:1px solid rgba(26,107,255,.15)">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px">' +
+            '<span style="font-size:11px;font-weight:700;color:var(--blue)">' + escHtml(primary) + (p.overallScore ? ' · ' + p.overallScore + '%' : '') + '</span>' +
+            (secondary ? '<span style="font-size:10px;color:var(--text3)">/ ' + escHtml(secondary) + '</span>' : '') +
+            '<span style="font-size:10px;color:var(--text3);margin-left:auto">' + dateStr + '</span>' +
+          '</div>' +
+          '<div style="font-family:var(--mono);font-size:9px;color:var(--text3)">' + escHtml(p.scanId) + '</div>' +
+        '</div>' +
+        '<button onclick="removeClientPendingPost(\'' + escHtml(p.scanId) + '\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0;line-height:1">×</button>' +
+      '</div>';
+    }).join('');
+  }
+  renderClientBasket();
+}
+function removeClientPendingPost(scanId) {
+  removeFromClientInvestigation(scanId);
+  const btn = document.getElementById('inv-btn-' + scanId);
+  if (btn) { btn.textContent = '+ Investigate'; btn.style.background = 'var(--blue-dim)'; btn.style.color = 'var(--blue)'; }
+}
+async function openAndRunClientInvestigation() {
+  showPage('investigate', document.getElementById('nav-investigate'));
+  setMobileTab('investigate');
+  await runClientInvestigation();
+}
+function addToClientInvestigation(scanId) {
+  const h = getHistory();
+  const entry = h.find(function(e){ return e.scanId === scanId || String(e.id) === String(scanId); });
+  if (!entry) { toast('Scan not found.'); return; }
+  const basket = getClientBasket();
+  if (basket.find(function(e){ return e.scanId === scanId; })) { toast('Already in basket.'); return; }
+  basket.push({ scanId: entry.scanId, ts: entry.ts, url: entry.url, postText: entry.postText, topMatches: entry.topMatches, overallScore: entry.overallScore, overallLabel: entry.overallLabel, platform: entry.platform });
+  saveClientBasket(basket);
+  const btn = document.getElementById('inv-btn-' + scanId);
+  if (btn) { btn.textContent = '✓ Added'; btn.style.background = 'var(--blue)'; btn.style.color = '#fff'; }
+  toast('Added · ' + basket.length + ' post' + (basket.length > 1 ? 's' : '') + ' in basket');
+}
+function removeFromClientInvestigation(scanId) { saveClientBasket(getClientBasket().filter(function(e){ return e.scanId !== scanId; })); }
+function clearClientInvestigation() {
+  if (getClientBasket().length === 0) return;
+  if (!confirm('Clear investigation basket?')) return;
+  localStorage.removeItem('wbt_client_investigate');
+  localStorage.removeItem('wbt_client_investigate_results');
+  updateClientInvestigateUI();
+  const resultsEl = document.getElementById('client-investigate-results');
+  if (resultsEl) resultsEl.innerHTML = '';
+  toast('Investigation cleared.');
+}
+function renderClientBasket() {
+  const el = document.getElementById('client-basket-list');
+  if (!el) return;
+  const basket = getClientBasket();
+  if (basket.length === 0) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:6px 0">No posts added yet.</div>'; return; }
+  el.innerHTML = basket.map(function(e) {
+    const d = e.ts ? new Date(e.ts) : null;
+    const topEntity = (e.topMatches||[])[0] || e.overallLabel || '—';
+    const excerpt = (e.postText||'').slice(0,180).replace(/</g,'&lt;');
+    const tooltip = escHtml(topEntity) + ' · ' + (e.overallScore||0) + '%' + (e.postText ? '&#10;&#10;"' + excerpt + (e.postText.length > 180 ? '…' : '') + '"' : '');
+    return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--border);font-size:12px" title="' + tooltip + '">' +
+      '<button onclick="removeFromClientInvestigation(\'' + escHtml(e.scanId) + '\')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px">×</button>' +
+      '<span style="font-family:var(--mono);font-size:10px;color:var(--text3)">' + escHtml(e.scanId) + '</span>' +
+      '<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)">' + escHtml(e.url||'') + '</span>' +
+      '<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue)">' + (e.overallScore||0) + '%</span>' +
+      (d ? '<span style="font-size:10px;color:var(--text3);flex-shrink:0">' + d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + '</span>' : '') +
+    '</div>';
+  }).join('');
+}
+
+// ─── CLIENT RUN INVESTIGATION ───
+// ─── CLIENT CLUSTER ID + SAVE + HISTORY ───
+function wbtShowTlPopup(event, uid, idx) {
+  const data = (window._wbtTl||{})[uid];
+  if (!data) return;
+  const d = data[idx]; if (!d) return;
+  const pop = document.getElementById(uid+'_pop');
+  const card = document.getElementById(uid+'_card');
+  if (!pop||!card) return;
+  let html = '<div style="font-weight:700;color:#1e293b;font-size:12px;margin-bottom:5px">'+escHtml(d.label)+'</div>';
+  html += '<div style="font-size:10px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Primary</div>';
+  html += '<div style="font-size:11px;color:#1e293b;margin-bottom:4px">'+escHtml(d.primary)+' &bull; '+d.score+'%</div>';
+  if (d.secondary) {
+    html += '<div style="font-size:10px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Secondary</div>';
+    html += '<div style="font-size:11px;color:#475569;margin-bottom:4px">'+escHtml(d.secondary)+'</div>';
+  }
+  if (d.date) html += '<div style="font-size:10px;color:#94a3b8;margin-bottom:4px">'+escHtml(d.date)+'</div>';
+  if (d.summary) html += '<div style="font-size:10px;color:#475569;font-style:italic;line-height:1.5">'+escHtml(d.summary)+'</div>';
+  pop.innerHTML = html;
+  pop.style.display = 'block';
+  const rect = card.getBoundingClientRect();
+  const popW = 220;
+  const spaceRight = window.innerWidth - event.clientX;
+  if (spaceRight < popW + 20) {
+    pop.style.left = (event.clientX - rect.left - popW - 12) + 'px';
+  } else {
+    pop.style.left = (event.clientX - rect.left + 12) + 'px';
+  }
+  pop.style.top = (event.clientY - rect.top - 10) + 'px';
+}
+function wbtHideTlPopup(uid) {
+  const pop = document.getElementById(uid+'_pop');
+  if (pop) pop.style.display = 'none';
+}
+
+function generateClientClusterId(srvVer) {
+  const now = new Date();
+  const date = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0');
+  const random = Math.random().toString(36).substring(2,6).toUpperCase();
+  const av = CLIENT_VERSION.replace(/\./g,'');
+  const sv = (srvVer||'?').replace(/\./g,'');
+  return 'WBT-CLU-' + date + '-' + av + '-' + sv + '-' + random;
+}
+async function saveClientCluster(synthesis, postIds, isolatedPostIds, connections, srvVer, preGeneratedId, basket) {
+  const clusterId = preGeneratedId || generateClientClusterId(srvVer);
+  // Build posts array from basket — has full data regardless of history state
+  const allIds = (postIds||[]).concat(isolatedPostIds||[]);
+  const postsArr = allIds.map(function(scanId) {
+    const p = (basket||[]).find(function(e){ return e.scanId === scanId; }) || {};
+    return { scanId, url: p.url||'', topMatches: p.topMatches||[], overallScore: p.overallScore||0, ts: p.ts||'' };
+  });
+  try {
+    await fetch(SERVER_URL + '/clusters/save', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        clusterId, clusterName: synthesis.clusterName||'', synopsis: synthesis.synopsis||'',
+        dominantEntity: synthesis.dominantEntity||'', connectionType: synthesis.connectionType||'',
+        frame: synthesis.frame||'', event: synthesis.event||'',
+        postIds: postIds||[], isolatedPostIds: isolatedPostIds||[],
+        postSummaries: synthesis.postSummaries||[],
+        connections: connections||[],
+        posts: postsArr,
+        postCount: (postIds||[]).length + (isolatedPostIds||[]).length,
+        source: 'client', deviceId: getDeviceId(), appVersion: CLIENT_VERSION, serverVersion: srvVer
+      })
+    });
+    return clusterId;
+  } catch(e) { console.warn('Cluster save failed:', e.message); return null; }
+}
+async function loadClientClusters() {
+  try {
+    const deviceId = getDeviceId();
+    const res = await fetch(SERVER_URL + '/clusters/list?device_id=' + encodeURIComponent(deviceId));
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.clusters || [];
+  } catch(e) { return []; }
+}
+async function renderClientFaq() {
+  const el = document.getElementById('faq-dynamic-list');
+  if (!el) return;
+  el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">Loading...</div>';
+  try {
+    const res = await fetch(SERVER_URL + '/faq/list');
+    if (!res.ok) throw new Error('Failed to load FAQs');
+    const data = await res.json();
+    const faqs = data.faqs || [];
+    if (!faqs.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text3)">No FAQs available.</div>'; return; }
+    const groups = {};
+    faqs.forEach(function(f) {
+      const g = f.group || 'General';
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(f);
+    });
+    let html = '';
+    Object.keys(groups).forEach(function(g) {
+      html += '<div class="faq-group"><div class="faq-group-label">' + escHtml(g) + '</div>';
+      groups[g].forEach(function(f) {
+        html += '<div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><span>' + escHtml(f.question) + '</span><svg class="faq-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
+        html += '<div class="faq-a">' + escHtml(f.answer).replace(/\n/g,'<br>') + '</div></div>';
+      });
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text3)">Could not load FAQs.</div>';
+  }
+}
+
+function renderClientClusters() {
+  const el = document.getElementById('client-clusters-list');
+  if (!el) return;
+  el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:8px 0">Loading...</div>';
+  loadClientClusters().then(function(clusters) {
+    if (!clusters.length) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:20px 0">No cluster analyses yet. Run an investigation to see results here.</div>';
+      return;
+    }
+    window._wbtClientClustersCache = clusters;
+    el.innerHTML = clusters.map(function(c, idx) {
+      const d = c.ts ? new Date(c.ts) : null;
+      const dateStr = d ? d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '—';
+      return '<div class="card" style="margin-bottom:10px;cursor:pointer" onclick="openClientClusterFromHistory(' + idx + ')">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">' +
+          '<span style="font-family:var(--mono);font-size:9px;color:var(--text3)">' + escHtml(c.id) + '</span>' +
+          '<span style="font-size:10px;color:var(--text3);margin-left:auto">' + dateStr + '</span>' +
+          '<span style="font-size:10px;color:var(--blue)">view →</span>' +
+        '</div>' +
+        '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">' + escHtml(c.clusterName||'Unnamed cluster') + '</div>' +
+        (c.synopsis ? '<p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:8px">' + escHtml(c.synopsis) + '</p>' : '') +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px">' +
+          (c.dominantEntity ? '<span class="history-tag" style="color:var(--blue)">' + escHtml(c.dominantEntity) + '</span>' : '') +
+          (c.connectionType ? '<span class="history-tag">' + escHtml(c.connectionType) + '</span>' : '') +
+        '</div>' +
+        '<div style="font-size:10px;color:var(--text3)">' + (c.postCount||0) + ' posts · ' + escHtml(c.source||'') + ' · ' + escHtml(c.appVersion||'') + '</div>' +
+      '</div>';
+    }).join('');
+  });
+}
+
+function openClientClusterFromHistory(idx) {
+  const c = (window._wbtClientClustersCache || [])[idx];
+  if (!c) return;
+  showPage('investigate', document.getElementById('nav-investigate'));
+  setMobileTab('investigate');
+  const resultsEl = document.getElementById('client-investigate-results');
+  if (!resultsEl) return;
+
+  // Update URL to cluster ID (#4)
+  history.pushState({ page: 'investigate', clusterId: c.id }, '', '#' + c.id);
+
+  const summaries = c.postSummaries || [];
+  const isolated = c.isolatedPostIds || [];
+  const connections = c.connections || [];
+  const savedPosts = c.posts || [];
+
+  // Reconstruct posts — prefer local history, fall back to saved posts data
+  const h = getHistory();
+  const allPostIds = (c.postIds||[]).concat(isolated);
+  const anchorTs = c.ts ? new Date(c.ts).getTime() : Date.now();
+  const posts = allPostIds.map(function(scanId, i) {
+    const found = h.find(function(e){ return e.scanId === scanId; });
+    const saved = savedPosts.find(function(p){ return p.scanId === scanId; });
+    const sumIdx = (c.postIds||[]).indexOf(scanId);
+    const summary = sumIdx >= 0 ? summaries[sumIdx] || '' : '';
+    if (found) return Object.assign({}, found, { _summary: summary });
+    if (saved) return Object.assign({}, saved, { _summary: summary, _missing: true });
+    return { scanId, url: '', postText: '', topMatches: [], overallScore: 0,
+      ts: new Date(anchorTs + i * 86400000).toISOString(), _summary: summary, _missing: true };
+  });
+  const postClusterMap = {};
+  (c.postIds||[]).forEach(function(id){ postClusterMap[id] = [0]; });
+
+  let html = '';
+
+  // Cluster ID at top
+  html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">';
+  html += '<a href="' + escHtml('https://haimglikman.github.io/whos-behind-that-client-dev/' + c.id) + '" style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(26,107,255,.2);border-radius:6px;padding:4px 12px;text-decoration:none">' + escHtml(c.id) + '</a>';
+  const cDate = c.ts ? new Date(c.ts).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+  if (cDate) html += '<span style="font-size:10px;color:var(--text3)">' + cDate + '</span>';
+  html += '</div>';
+
+  // Timeline
+  html += renderClientTimeline(posts, [c.postIds||[]], isolated, postClusterMap, connections, true);
+
+  // Synopsis card
+  html += '<div class="card" style="margin-bottom:10px">';
+  html += '<div style="margin-bottom:10px">';
+  html += '<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Cluster name</div>';
+  html += '<div style="display:flex;gap:8px;align-items:center">';
+  html += '<input type="text" class="url-input" style="flex:1;font-size:12px;font-weight:600;color:var(--text);height:32px" id="client-cluster-name-hist" value="' + escHtml(c.clusterName||'') + '" />';
+  html += '<button style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans);white-space:nowrap" data-cid="' + escHtml(c.id) + '" onclick="renameClientCluster(this.dataset.cid,\'hist\')">Save</button>';
+  html += '</div></div>';
+  if (c.frame || c.event) {
+    html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
+    if (c.frame) html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px"><div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Frame</div><div style="font-size:12px;color:var(--text)">' + escHtml(c.frame) + '</div></div>';
+    if (c.event) html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px"><div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Event</div><div style="font-size:12px;color:var(--text)">' + escHtml(c.event) + '</div></div>';
+    html += '</div>';
+  }
+  if (c.connectionType) html += '<div style="font-size:10px;color:var(--text3);font-style:italic;margin-bottom:8px">' + escHtml(c.connectionType) + '</div>';
+  html += '<p style="font-size:12px;line-height:1.7;color:var(--text2);margin-bottom:10px">' + escHtml(c.synopsis||'') + '</p>';
+  if (c.dominantEntity) html += '<div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px">Serves: <span style="color:var(--text2)">' + escHtml(c.dominantEntity) + '</span></div>';
+  html += '</div>';
+
+  // Legend after synopsis
+  html += renderClientLegend(posts, [c.postIds||[]], isolated, postClusterMap, true);
+
+  resultsEl.innerHTML = html;
+}
+
+async function renameClientCluster(clusterId, suffix) {
+  const input = document.getElementById('client-cluster-name-' + suffix);
+  if (!input) return;
+  const newName = input.value.trim();
+  if (!newName) return;
+  try {
+    await fetch(SERVER_URL + '/clusters/rename', {
+      method:'PATCH', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ clusterId, clusterName: newName })
+    });
+    toast('Cluster renamed ✓');
+  } catch(e) { toast('Rename failed'); }
+}
+
+const CLIENT_CLUSTER_COLORS = [
+  { bg:'#eff6ff', border:'#1a6bff', text:'#1a6bff', label:'A' },
+  { bg:'#e1f5ee', border:'#0f6e56', text:'#0f6e56', label:'B' },
+  { bg:'#faeeda', border:'#ba7517', text:'#ba7517', label:'C' },
+  { bg:'#fbeaf0', border:'#993556', text:'#993556', label:'D' },
+];
+// ─── CLIENT TIMELINE + LEGEND (mirrors admin) ───
+function renderClientTimeline(basket, clusters, isolated, postClusterMap, connections, presorted) {
+  if (!basket || basket.length === 0) return '';
+  const sorted = presorted ? basket.slice() : basket.slice().sort(function(a,b){ return new Date(a.ts||0) - new Date(b.ts||0); });
+
+  const NO_ENTITY = 'No detected entity';
+  const entityOrder = [];
+  sorted.forEach(function(p) {
+    const e = (p.topMatches||[])[0] || NO_ENTITY;
+    if (!entityOrder.includes(e)) entityOrder.push(e);
+  });
+
+  const LABEL_W = 120, BUFFER = 2, POST_START = LABEL_W + BUFFER;
+  const W = 560, nodeR = 16, LANE_H = 65, TOP_PAD = 32, BOTTOM_PAD = 46;
+  const H = TOP_PAD + entityOrder.length * LANE_H + BOTTOM_PAD;
+  const AXIS_Y = H - BOTTOM_PAD + 10;
+  const DRAW_W = W - POST_START - 12;
+
+  const times = sorted.map(function(p){ return new Date(p.ts||0).getTime(); });
+  const tMin = Math.min.apply(null,times), tMax = Math.max.apply(null,times);
+  const tRange = tMax - tMin || 1;
+
+  const laneGroups = {};
+  sorted.forEach(function(p) {
+    const e = (p.topMatches||[])[0] || NO_ENTITY;
+    const key = e + '|' + (p.ts ? new Date(p.ts).toLocaleDateString('en-GB') : '');
+    if (!laneGroups[key]) laneGroups[key] = [];
+    laneGroups[key].push(p.scanId);
+  });
+
+  function xOf(p) {
+    const d = p.ts ? new Date(p.ts) : new Date(0);
+    const e = (p.topMatches||[])[0] || NO_ENTITY;
+    const key = e + '|' + d.toLocaleDateString('en-GB');
+    const group = laneGroups[key] || [];
+    const idx = group.indexOf(p.scanId);
+    const baseX = POST_START + (d.getTime() - tMin) / tRange * DRAW_W;
+    const offset = group.length > 1 ? (idx - (group.length-1)/2) * (nodeR*2+4) : 0;
+    return Math.max(POST_START+nodeR, Math.min(W-12-nodeR, baseX+offset));
+  }
+
+  function yOf(scanId) {
+    const p = sorted.find(function(q){ return q.scanId===scanId; });
+    if (!p) return TOP_PAD + nodeR;
+    const e = (p.topMatches||[])[0] || NO_ENTITY;
+    return TOP_PAD + entityOrder.indexOf(e) * LANE_H + Math.floor(LANE_H/2);
+  }
+
+  function wrapLabel(name) {
+    const MAX = 16;
+    if (name.length <= MAX) return [name];
+    let b = name.lastIndexOf(' ', MAX); if (b<2) b=MAX;
+    const l1 = name.slice(0,b).trim(), rest = name.slice(b).trim();
+    if (rest.length <= MAX) return [l1, rest];
+    let b2 = rest.lastIndexOf(' ', MAX); if (b2<2) b2=MAX;
+    return [l1, rest.slice(0,b2).trim(), rest.slice(b2).trim()];
+  }
+
+  const uid = 'ctl' + Math.random().toString(36).slice(2,6);
+  window._wbtTl = window._wbtTl || {};
+  window._wbtTl[uid] = sorted.map(function(p, idx) {
+    const d = p.ts ? new Date(p.ts) : null;
+    return {
+      label: 'P' + (idx+1),
+      primary: (p.topMatches||[])[0] || NO_ENTITY,
+      score: (p.overallScore||0),
+      secondary: (p.topMatches||[])[1] || '',
+      date: d ? d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) : '',
+      summary: p._summary || ''
+    };
+  });
+
+  let out = '<div class="card" style="padding:10px 12px 8px;margin-bottom:10px;overflow:auto;position:relative" id="' + uid + '_card">';
+  out += '<div id="' + uid + '_pop" style="display:none;position:absolute;background:#fff;border:1px solid #cfe0f5;border-radius:8px;padding:8px 10px;box-shadow:0 4px 16px rgba(15,39,68,.12);z-index:100;pointer-events:none;min-width:160px;max-width:220px;font-family:var(--sans)"></div>';
+
+  let svg = '<svg width="100%" viewBox="0 0 ' + W + ' ' + H + '" style="overflow:visible;min-width:' + W + 'px">';
+
+  entityOrder.forEach(function(e, i) {
+    const laneY = TOP_PAD + i * LANE_H;
+    const laneCY = laneY + Math.floor(LANE_H/2);
+    const isNone = e === NO_ENTITY;
+    svg += '<rect x="0" y="' + laneY + '" width="' + W + '" height="' + LANE_H + '" fill="' + (isNone?'#f8f6f3':'#eff6ff') + '" opacity="0.5"/>';
+    svg += '<line x1="' + LABEL_W + '" y1="' + laneY + '" x2="' + LABEL_W + '" y2="' + (laneY+LANE_H) + '" stroke="#deeaf8" stroke-width="0.5"/>';
+    const lines = wrapLabel(e);
+    const lineH = 10, totalH = (lines.length-1)*lineH;
+    const startY = laneCY - totalH/2;
+    lines.forEach(function(line, li) {
+      svg += '<text font-family="Nunito,sans-serif" font-size="8" font-weight="600" fill="' + (isNone?'#94a3b8':'#475569') + '" x="6" y="' + (startY+li*lineH) + '">' + escHtml(line) + '</text>';
+    });
+  });
+
+  svg += '<line x1="' + POST_START + '" y1="' + AXIS_Y + '" x2="' + (W-8) + '" y2="' + AXIS_Y + '" stroke="#cfe0f5" stroke-width="1"/>';
+
+  const shownDates = new Set(); let lastLX = -999;
+  sorted.forEach(function(p) {
+    const d = p.ts ? new Date(p.ts) : null; if (!d) return;
+    const dk = d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+    if (!shownDates.has(dk)) {
+      shownDates.add(dk);
+      const bx = POST_START + (d.getTime()-tMin)/tRange*DRAW_W;
+      svg += '<line x1="' + bx + '" y1="' + (AXIS_Y-3) + '" x2="' + bx + '" y2="' + (AXIS_Y+3) + '" stroke="#cfe0f5" stroke-width="1"/>';
+      if (bx-lastLX >= 44) {
+        svg += '<text font-family="Nunito,sans-serif" font-size="9" fill="#94a3b8" x="' + bx + '" y="' + (AXIS_Y+14) + '" text-anchor="middle">' + dk + '</text>';
+        lastLX = bx;
+      }
+    }
+  });
+
+  connections.forEach(function(conn) {
+    const pa = sorted.find(function(p){ return p.scanId===conn.postA; });
+    const pb = sorted.find(function(p){ return p.scanId===conn.postB; });
+    if (!pa||!pb) return;
+    const x1=xOf(pa), x2=xOf(pb), y1=yOf(conn.postA), y2=yOf(conn.postB);
+    const cis = postClusterMap[conn.postA]||[];
+    const col = cis.length>0 ? CLIENT_CLUSTER_COLORS[cis[0]%CLIENT_CLUSTER_COLORS.length].border : '#cfe0f5';
+    svg += '<path d="M'+x1+' '+y1+' Q '+((x1+x2)/2)+' '+(Math.min(y1,y2)-16)+' '+x2+' '+y2+'" fill="none" stroke="'+col+'" stroke-width="1.4" stroke-dasharray="5 4"/>';
+  });
+
+  clusters.forEach(function(cluster, ci) {
+    const col = CLIENT_CLUSTER_COLORS[ci%CLIENT_CLUSTER_COLORS.length];
+    const pts = cluster.map(function(id){ return sorted.find(function(p){ return p.scanId===id; }); }).filter(Boolean);
+    if (pts.length<2) return;
+    const xs=pts.map(xOf), midX=(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2;
+    const minY=Math.min.apply(null,cluster.map(yOf)), pillY=Math.max(10,minY-20);
+    svg += '<rect x="'+(midX-26)+'" y="'+(pillY-6)+'" width="52" height="13" rx="6" fill="'+col.bg+'" stroke="'+col.border+'" stroke-width="0.5"/>';
+    svg += '<text font-family="Nunito,sans-serif" font-size="7" font-weight="700" fill="'+col.text+'" x="'+midX+'" y="'+(pillY+3)+'" text-anchor="middle" letter-spacing="0.4">CLUSTER '+col.label+'</text>';
+  });
+
+  sorted.forEach(function(p, pidx) {
+    const x=xOf(p), y=yOf(p.scanId);
+    const cis=postClusterMap[p.scanId]||[];
+    const isIso=cis.length===0, isMulti=cis.length>1;
+    const num=pidx+1;
+
+    if (isMulti) {
+      const c0=CLIENT_CLUSTER_COLORS[cis[0]%CLIENT_CLUSTER_COLORS.length], c1=CLIENT_CLUSTER_COLORS[cis[1]%CLIENT_CLUSTER_COLORS.length];
+      svg += '<path d="M'+x+' '+(y-nodeR)+' A '+nodeR+' '+nodeR+' 0 0 1 '+x+' '+(y+nodeR)+'" fill="none" stroke="'+c1.border+'" stroke-width="4"/>';
+      svg += '<path d="M'+x+' '+(y-nodeR)+' A '+nodeR+' '+nodeR+' 0 0 0 '+x+' '+(y+nodeR)+'" fill="none" stroke="'+c0.border+'" stroke-width="4"/>';
+      svg += '<circle cx="'+x+'" cy="'+y+'" r="'+(nodeR-3)+'" fill="white"/>';
+    } else if (isIso) {
+      svg += '<circle cx="'+x+'" cy="'+y+'" r="'+nodeR+'" fill="#f1efe8" stroke="#b4b2a9" stroke-width="1"/>';
+    } else {
+      const col=CLIENT_CLUSTER_COLORS[cis[0]%CLIENT_CLUSTER_COLORS.length];
+      svg += '<circle cx="'+x+'" cy="'+y+'" r="'+nodeR+'" fill="'+col.bg+'" stroke="'+col.border+'" stroke-width="1.5"/>';
+    }
+
+    const tc = isMulti?'#1e293b':isIso?'#888780':CLIENT_CLUSTER_COLORS[cis[0]%CLIENT_CLUSTER_COLORS.length].text;
+    svg += '<text font-family="Nunito,sans-serif" font-size="9" font-weight="700" fill="'+tc+'" x="'+x+'" y="'+(y-2)+'" text-anchor="middle" style="pointer-events:none">P'+num+'</text>';
+    svg += '<text font-family="Nunito,sans-serif" font-size="8" fill="'+tc+'" x="'+x+'" y="'+(y+8)+'" text-anchor="middle" style="pointer-events:none">'+(p.overallScore||0)+'%</text>';
+    svg += '<circle cx="'+x+'" cy="'+y+'" r="'+nodeR+'" fill="transparent" style="cursor:pointer" onmouseenter="wbtShowTlPopup(event,&quot;'+uid+'&quot;,'+pidx+')" onmouseleave="wbtHideTlPopup(&quot;'+uid+'&quot;)" />';
+  });
+
+  svg += '</svg>';
+  out += svg + '</div>';
+  return out;
+}
+function renderClientLegend(basket, clusters, isolated, postClusterMap, presorted) {
+  const sorted = presorted ? basket.slice() : basket.slice().sort(function(a,b){ return new Date(a.ts||0) - new Date(b.ts||0); });
+  const includedIds = clusters.flat();
+  let html = '<div class="card" style="padding:10px 14px;margin-bottom:10px">';
+  html += '<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Legend</div>';
+
+  if (includedIds.length > 0) {
+    html += '<div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Included</div>';
+    sorted.filter(function(p){ return includedIds.includes(p.scanId); }).forEach(function(p) {
+      const cis = postClusterMap[p.scanId] || [];
+      const idx = sorted.indexOf(p) + 1;
+      const color = cis.length > 0 ? CLIENT_CLUSTER_COLORS[cis[0] % CLIENT_CLUSTER_COLORS.length] : CLIENT_CLUSTER_COLORS[0];
+      const d = p.ts ? new Date(p.ts) : null;
+      const secondary = (p.topMatches||[])[1] || '';
+      html += '<div style="padding:6px 0;border-top:1px solid var(--border)">';
+      html += '<div style="display:flex;align-items:center;gap:8px;font-size:12px;flex-wrap:wrap">';
+      html += '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:' + color.bg + ';border:1.5px solid ' + color.border + ';font-size:9px;font-weight:700;color:' + color.text + ';flex-shrink:0">P' + idx + '</span>';
+      html += '<span style="font-weight:700;color:var(--text);font-size:11px">' + escHtml((p.topMatches||[])[0] || p.overallLabel || '') + '</span>';
+      html += '<span style="font-family:var(--mono);font-size:10px;font-weight:700;color:' + color.text + ';background:' + color.bg + ';border:1px solid ' + color.border + ';border-radius:99px;padding:1px 7px">' + (p.overallScore||0) + '%</span>';
+      if (d) html += '<span style="font-size:10px;color:var(--text3)">' + d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + '</span>';
+      if (p.url) html += '<a href="' + escHtml(p.url) + '" target="_blank" rel="noopener" style="font-size:10px;color:var(--blue);font-weight:700;text-decoration:none;margin-left:auto;flex-shrink:0">↗ Go to post</a>';
+      html += '</div>';
+      if (secondary) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px;margin-left:28px">Secondary: <span style="color:var(--text2)">' + escHtml(secondary) + '</span></div>';
+      if (p._summary) html += '<div style="font-size:11px;color:var(--text2);margin-top:3px;margin-left:28px;font-style:italic;line-height:1.5">' + escHtml(p._summary) + '</div>';
+      html += '</div>';
+    });
+  }
+
+  if (isolated.length > 0) {
+    html += '<div style="font-size:10px;font-weight:700;color:var(--text3);margin-top:10px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Omitted</div>';
+    sorted.filter(function(p){ return isolated.includes(p.scanId); }).forEach(function(p) {
+      const idx = sorted.indexOf(p) + 1;
+      const secondary = (p.topMatches||[])[1] || '';
+      html += '<div style="padding:6px 0;border-top:1px solid var(--border)">';
+      html += '<div style="display:flex;align-items:center;gap:8px;font-size:11px;flex-wrap:wrap">';
+      html += '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#f1efe8;border:1px solid #b4b2a9;font-size:9px;font-weight:700;color:#888780;flex-shrink:0">P' + idx + '</span>';
+      html += '<span style="color:var(--text3)">' + escHtml((p.topMatches||[])[0] || p.overallLabel || '') + '</span>';
+      html += '<span style="font-size:10px;color:var(--text3);font-style:italic">No connection</span>';
+      if (p.url) html += '<a href="' + escHtml(p.url) + '" target="_blank" rel="noopener" style="font-size:10px;color:var(--blue);font-weight:700;text-decoration:none;margin-left:auto">↗ Go to post</a>';
+      html += '</div>';
+      if (secondary) html += '<div style="font-size:11px;color:var(--text3);margin-top:2px;margin-left:28px">Secondary: <span style="color:var(--text2)">' + escHtml(secondary) + '</span></div>';
+      if (p._summary) html += '<div style="font-size:11px;color:var(--text2);margin-top:3px;margin-left:28px;font-style:italic;line-height:1.5">' + escHtml(p._summary) + '</div>';
+      html += '</div>';
+    });
+  }
+
+  html += '</div>';
+  return html;
+}
+
+async function runClientInvestigation() {
+  const basket = getClientBasket();
+  if (basket.length < 2) { toast('Add at least 2 posts to investigate.'); return; }
+  const btn = document.getElementById('client-run-btn');
+  const resultsEl = document.getElementById('client-investigate-results');
+  btn.disabled = true; btn.textContent = 'Running...';
+  resultsEl.innerHTML = '<div class="card" style="text-align:center;padding:20px"><div style="font-size:12px;color:var(--text3)">Detecting connections...</div></div>';
+  // Auto-clear investigate buttons (#5)
+  document.querySelectorAll('[id^="inv-btn-"]').forEach(function(b){ b.textContent = '+ Investigate'; b.style.background = 'var(--blue-dim)'; b.style.color = 'var(--blue)'; });
+  try {
+    const detectRes = await fetch(SERVER_URL + '/investigate/detect', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ posts: basket }) });
+    if (!detectRes.ok) throw new Error('Detection failed: ' + detectRes.status);
+    const detectData = await detectRes.json();
+    const { clusters, isolated, connections } = detectData;
+    if (clusters.length === 0) {
+      resultsEl.innerHTML = '<div class="card"><div style="font-size:12px;color:var(--text3);padding:6px 0">No meaningful connections found between the selected posts.</div></div>';
+      btn.disabled = false; btn.textContent = '✦ Run investigation'; return;
+    }
+    resultsEl.innerHTML = '<div class="card" style="text-align:center;padding:20px"><div style="font-size:12px;color:var(--text3)">Synthesizing ' + clusters.length + ' cluster' + (clusters.length > 1 ? 's' : '') + '...</div></div>';
+    const syntheses = await Promise.allSettled(clusters.map(function(cluster) {
+      return fetch(SERVER_URL + '/investigate/synthesize', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ cluster, posts: basket }) }).then(function(r){ return r.json(); });
+    }));
+    const results = syntheses.map(function(r, i){ return r.status === 'fulfilled' ? r.value.synthesis : { clusterName: 'Cluster ' + (i+1), synopsis: 'Synthesis failed.', postIds: clusters[i] }; });
+    const postMap = {};
+    basket.forEach(function(p){ postMap[p.scanId] = p; });
+    // Attach postSummaries to posts (#3)
+    results.forEach(function(s) {
+      if (!s.postSummaries || !s.postIds) return;
+      s.postIds.forEach(function(scanId, i) { if (postMap[scanId]) postMap[scanId]._summary = s.postSummaries[i] || ''; });
+    });
+    const postClusterMap = {};
+    clusters.forEach(function(cluster, ci){ cluster.forEach(function(id){ if (!postClusterMap[id]) postClusterMap[id] = []; postClusterMap[id].push(ci); }); });
+    const enrichedBasket = basket.map(function(p){ return postMap[p.scanId] || p; });
+    let html = '';
+    const srvVerMatch = document.getElementById('srv-ver-label') ? document.getElementById('srv-ver-label').textContent.replace('srv v','') : '?';
+    const clientClusterIds = results.map(function(){ return generateClientClusterId(srvVerMatch); });
+
+    // Cluster ID above timeline
+    clientClusterIds.forEach(function(cid) {
+      if (!cid) return;
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
+      html += '<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(26,107,255,.2);border-radius:6px;padding:4px 12px">' + escHtml(cid) + '</span>';
+      html += '</div>';
+    });
+
+    // Timeline
+    html += renderClientTimeline(enrichedBasket, clusters, isolated, postClusterMap, connections);
+
+    // Synopsis cards
+    results.forEach(function(s, i) {
+      const cid = clientClusterIds[i] || '';
+      html += '<div class="card" style="margin-bottom:10px">';
+      // Rename field
+      html += '<div style="margin-bottom:10px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Cluster name</div>';
+      html += '<div style="display:flex;gap:8px;align-items:center">';
+      html += '<input type="text" class="url-input" style="flex:1;font-size:12px;font-weight:600;color:var(--text);height:32px" id="client-cluster-name-' + i + '" value="' + escHtml(s.clusterName||'Cluster '+(i+1)) + '" />';
+      html += '<button style="background:var(--blue);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans);white-space:nowrap" data-cid="' + escHtml(cid) + '" data-idx="' + i + '" onclick="renameClientCluster(this.dataset.cid,this.dataset.idx)">Save</button>';
+      html += '</div></div>';
+      // Frame + Event
+      if (s.frame || s.event) {
+        html += '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
+        if (s.frame) html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px"><div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Frame</div><div style="font-size:12px;color:var(--text)">' + escHtml(s.frame) + '</div></div>';
+        if (s.event) html += '<div style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px"><div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Event</div><div style="font-size:12px;color:var(--text)">' + escHtml(s.event) + '</div></div>';
+        html += '</div>';
+      }
+      if (s.connectionType) html += '<div style="font-size:10px;color:var(--text3);font-style:italic;margin-bottom:8px">' + escHtml(s.connectionType) + '</div>';
+      html += '<p style="font-size:12px;line-height:1.7;color:var(--text2);margin-bottom:8px">' + escHtml(s.synopsis||'') + '</p>';
+      if (s.dominantEntity) html += '<div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:8px">Serves: <span style="color:var(--text2)">' + escHtml(s.dominantEntity) + '</span></div>';
+      // No post summaries here — they appear in the legend below
+      html += '</div>';
+    });
+
+    // Legend after synopsis
+    html += renderClientLegend(enrichedBasket, clusters, isolated, postClusterMap);
+    resultsEl.innerHTML = html;
+    await Promise.allSettled(results.map(function(s, i) {
+      return saveClientCluster(s, clusters[i], isolated, connections, srvVerMatch, clientClusterIds[i], enrichedBasket);
+    }));
+    // Clear basket after successful investigation
+    saveClientBasket([]);
+    updateClientInvestigateUI();
+  } catch(err) {
+    resultsEl.innerHTML = '<div class="card"><div style="font-size:12px;color:var(--red)">Investigation failed: ' + escHtml(err.message) + '</div></div>';
+  }
+  btn.disabled = false; btn.textContent = '✦ Run investigation';
+}
 function initStatusBar() {
   document.getElementById('app-ver-label').textContent = 'app v' + CLIENT_VERSION;
   const appVerTopbar = document.getElementById('app-ver-topbar');
@@ -1730,12 +2360,23 @@ function initStatusBar() {
 // ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', function() {
   getDeviceId();
+  updateClientInvestigateUI();
   migrateLocalHistory();
   updateSidebar();
   const emailEl = document.getElementById('contact-email');
   if (emailEl) { emailEl.href = 'mailto:' + CONTACT_EMAIL; emailEl.textContent = CONTACT_EMAIL; }
   const initPage = location.hash.replace('#','') || 'analyze';
-  if (initPage !== 'analyze' && document.getElementById('page-' + initPage)) {
+  // Check if hash is a cluster ID
+  if (initPage.startsWith('WBT-CLU-')) {
+    // Load clusters then open matching one
+    showPage('investigate', document.getElementById('nav-investigate'));
+    setMobileTab('investigate');
+    loadClientClusters().then(function(clusters) {
+      window._wbtClientClustersCache = clusters;
+      const idx = clusters.findIndex(function(c){ return c.id === initPage; });
+      if (idx >= 0) openClientClusterFromHistory(idx);
+    });
+  } else if (initPage !== 'analyze' && document.getElementById('page-' + initPage)) {
     document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
     document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
     document.getElementById('page-' + initPage).classList.add('active');
@@ -1746,6 +2387,14 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   history.replaceState({ page: initPage }, '', '#' + initPage);
   startWarmup();
+  // Close entity dropdown on outside click
+  document.addEventListener('click', function(e) {
+    const dd = document.getElementById('cf-entity-dropdown');
+    const input = document.getElementById('cf-entity');
+    if (dd && input && !dd.contains(e.target) && e.target !== input) {
+      dd.style.display = 'none';
+    }
+  });
 });
 
 async function startWarmup() {
@@ -1825,8 +2474,12 @@ function setMobileTab(name) {
     History
   </button>
   <button class="mobile-tab" id="mtab-investigate" onclick="showPage('investigate',document.getElementById('nav-investigate'));setMobileTab('investigate')">
-    <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="7" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="17" r="2.5" stroke="currentColor" stroke-width="1.8"/><line x1="10.2" y1="10.8" x2="13.8" y2="8.2" stroke="currentColor" stroke-width="1.5"/><line x1="10.2" y1="13.2" x2="13.8" y2="15.8" stroke="currentColor" stroke-width="1.5"/></svg>
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="7" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="17" r="2.5" stroke="currentColor" stroke-width="1.8"/><line x1="10.2" y1="10.8" x2="14" y2="8.2" stroke="currentColor" stroke-width="1.5"/><line x1="10.2" y1="13.2" x2="14" y2="15.8" stroke="currentColor" stroke-width="1.5"/></svg>
     Investigate
+  </button>
+  <button class="mobile-tab" id="mtab-clusters" onclick="showPage('clusters',document.getElementById('nav-clusters'));setMobileTab('clusters')">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="6" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="18" r="3" stroke="currentColor" stroke-width="1.8"/><line x1="7.8" y1="10.5" x2="16.2" y2="7.5" stroke="currentColor" stroke-width="1.5"/><line x1="7.8" y1="13.5" x2="16.2" y2="16.5" stroke="currentColor" stroke-width="1.5"/></svg>
+    Clusters
   </button>
   <button class="mobile-tab" id="mtab-faq" onclick="showPage('faq',document.getElementById('nav-faq'));setMobileTab('faq')">
     <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 9.5a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="1" fill="currentColor"/></svg>
