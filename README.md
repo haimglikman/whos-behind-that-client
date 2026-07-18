@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.17.0 (client) | Server: v1.22.4 | Admin: v2.16.0
+- About page: new "Deployed versions" section showing app, server, entities, and all prompt versions with last updated date in DD/MM/YYYY format
+
 ### v1.16.2 (client) | Server: v1.22.1 | Admin: v2.14.2
 - Entities now loaded from server DB on page load — always uses latest version set by admin
 - Falls back to DEFAULT_ENTITIES if server unreachable
