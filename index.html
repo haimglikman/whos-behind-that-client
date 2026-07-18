@@ -559,13 +559,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
         <h1>About</h1>
       </div>
 
-      <!-- Deployed versions -->
-      <div class="about-section" style="margin-bottom:20px">
-        <h2>Deployed versions</h2>
-        <div id="client-deployed-versions" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
-          <div style="font-size:12px;color:var(--text3)">Loading...</div>
-        </div>
-      </div>
+      <div class="about-section">
         <h2>What is <em>Who's Behind That?</em></h2>
         <p><em>Who's Behind That?</em> is an AI-powered tool that analyzes social media posts and news articles to detect narrative alignment — whose political agenda a post or article serves, and what context it leaves out. It uses Claude AI to score content against a database of geopolitical entities related to the Israeli-Palestinian conflict and Israeli domestic politics.</p>
         <p>This tool is designed for researchers, journalists, and media-literate individuals who want to understand the information landscape around this conflict.</p>
@@ -605,6 +599,13 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           <p style="margin-top:8px"><strong>Data retention:</strong> Scan data is retained for service operation purposes. You may request deletion by contacting us.</p>
           <p style="margin-top:8px"><strong>Third parties:</strong> Post text is sent to Anthropic's Claude API for analysis. Anthropic's privacy policy applies to that processing. No data is shared with any other third party.</p>
           <p style="margin-top:8px"><strong>No cookies:</strong> <em>Who's Behind That?</em> does not use cookies. It relies on browser local storage only, which stays on your device and is not used for tracking across other sites.</p>
+        </div>
+      </div>
+
+      <div class="about-section">
+        <h2>Deployed versions</h2>
+        <div id="client-deployed-versions" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
+          <div style="font-size:12px;color:var(--text3)">Loading...</div>
         </div>
       </div>
 
@@ -782,7 +783,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.17.0';
+const CLIENT_VERSION = '1.17.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
