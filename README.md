@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.17.2 — bug fix (client) | Server: v1.22.4 | Admin: v2.16.0
+- Deployed versions: prompt modules (Scan, Coherence, Connection, Synopsis, Actor, Convergent Interest) now shown on a second row with version and timestamp
+- App and Server cards kept on first row with Entities
+
 ### v1.17.1 — bug fix (client) | Server: v1.22.4 | Admin: v2.16.0
 - Fixed About page layout broken in v1.17.0 — restored original section structure
 - Deployed versions section now correctly placed between Privacy and Contact
