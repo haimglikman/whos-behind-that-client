@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.17.1 — bug fix (client) | Server: v1.22.4 | Admin: v2.16.0
+- Fixed About page layout broken in v1.17.0 — restored original section structure
+- Deployed versions section now correctly placed between Privacy and Contact
+- Clusters history and FAQ pages no longer affected
+
 ### v1.17.0 (client) | Server: v1.22.4 | Admin: v2.16.0
 - About page: new "Deployed versions" section showing app, server, entities, and all prompt versions with last updated date in DD/MM/YYYY format
 
