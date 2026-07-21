@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.17.3 (client) | Server: v1.22.7 | Admin: v2.16.2
+- Registers client version with server on page load for monitoring in admin deployed versions panel
+
 ### v1.17.2 — bug fix (client) | Server: v1.22.4 | Admin: v2.16.0
 - Deployed versions: prompt modules (Scan, Coherence, Connection, Synopsis, Actor, Convergent Interest) now shown on a second row with version and timestamp
 - App and Server cards kept on first row with Entities
