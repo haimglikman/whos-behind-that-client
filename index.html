@@ -783,7 +783,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.17.2';
+const CLIENT_VERSION = '1.17.3';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -2465,6 +2465,11 @@ window.addEventListener('DOMContentLoaded', function() {
   }
   history.replaceState({ page: initPage }, '', '#' + initPage);
   startWarmup();
+  // Register client version with server for monitoring
+  fetch(SERVER_URL + '/client/register', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ deviceId: getDeviceId(), clientVersion: CLIENT_VERSION })
+  }).catch(function(){});
   // Load entities from server on startup
   loadEntitiesFromServer();
   // Close entity dropdown on outside click
