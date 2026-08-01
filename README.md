@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.17.5 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
+- Fixed: desktop nav bar (Analyze / Post history / Investigate / Clusters history / FAQ / About) was showing on mobile — now hidden, only the bottom tab bar shows on mobile
+
 ### v1.17.4 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
 - Fixed mobile tab bar layout broken by addition of Investigate and Clusters history tabs — 6 tabs now fit correctly with smaller font (8.5px) and icons (18px)
 - Added bottom padding to main content so it doesn't hide behind the tab bar
