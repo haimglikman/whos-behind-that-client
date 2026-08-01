@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.17.4 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
+- Fixed mobile tab bar layout broken by addition of Investigate and Clusters history tabs — 6 tabs now fit correctly with smaller font (8.5px) and icons (18px)
+- Added bottom padding to main content so it doesn't hide behind the tab bar
+
 ### v1.17.3 (client) | Server: v1.22.7 | Admin: v2.16.2
 - Registers client version with server on page load for monitoring in admin deployed versions panel
 
