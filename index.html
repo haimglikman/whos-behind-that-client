@@ -248,7 +248,10 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 
 @media (max-width:640px) {
   .sidebar{display:none}
-  .nav{display:none}
+  .nav{display:flex;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:0 8px}
+  .nav::-webkit-scrollbar{display:none}
+  .nav-item{font-size:12px;padding:10px 12px;white-space:nowrap;flex-shrink:0}
+  .mobile-tabs{display:none}
   .shell{padding-bottom:60px}
   .bottombar{display:none}
   .topbar-mobile-only{display:block}
@@ -268,7 +271,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   }
   .mobile-tab.active{color:var(--blue)}
   .mobile-tab svg{width:18px;height:18px;flex-shrink:0}
-  .main{padding:14px 16px;gap:10px;padding-bottom:70px}
+  .main{padding:14px 16px;gap:10px}
   .url-card{padding:12px 14px}
   .result-card{padding:12px 14px}
   .score-row{gap:10px}
@@ -784,7 +787,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.17.5';
+const CLIENT_VERSION = '1.17.6';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -2560,11 +2563,11 @@ function setMobileTab(name) {
     History
   </button>
   <button class="mobile-tab" id="mtab-investigate" onclick="showPage('investigate',document.getElementById('nav-investigate'));setMobileTab('investigate')">
-    <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="7" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="17" r="2.5" stroke="currentColor" stroke-width="1.8"/><line x1="10.2" y1="10.8" x2="14" y2="8.2" stroke="currentColor" stroke-width="1.5"/><line x1="10.2" y1="13.2" x2="14" y2="15.8" stroke="currentColor" stroke-width="1.5"/></svg>
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><line x1="12" y1="4" x2="12" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="12" y1="17" x2="12" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="12" x2="7" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="17" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
     Investigate
   </button>
   <button class="mobile-tab" id="mtab-clusters" onclick="showPage('clusters',document.getElementById('nav-clusters'));setMobileTab('clusters')">
-    <svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="6" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="19" cy="18" r="3" stroke="currentColor" stroke-width="1.8"/><line x1="7.8" y1="10.5" x2="16.2" y2="7.5" stroke="currentColor" stroke-width="1.5"/><line x1="7.8" y1="13.5" x2="16.2" y2="16.5" stroke="currentColor" stroke-width="1.5"/></svg>
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="12" r="5.5" stroke="currentColor" stroke-width="1.8"/><circle cx="16" cy="12" r="5.5" stroke="currentColor" stroke-width="1.8"/></svg>
     Clusters
   </button>
   <button class="mobile-tab" id="mtab-faq" onclick="showPage('faq',document.getElementById('nav-faq'));setMobileTab('faq')">
