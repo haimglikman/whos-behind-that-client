@@ -248,10 +248,8 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
 
 @media (max-width:640px) {
   .sidebar{display:none}
-  .nav{display:flex;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:0 8px}
-  .nav::-webkit-scrollbar{display:none}
-  .nav-item{font-size:12px;padding:10px 12px;white-space:nowrap;flex-shrink:0}
-  .mobile-tabs{display:none}
+  .nav{display:none}
+  .mobile-tabs{display:flex;position:fixed;top:52px;bottom:auto;border-top:none;border-bottom:1px solid var(--border)}
   .shell{padding-bottom:60px}
   .bottombar{display:none}
   .topbar-mobile-only{display:block}
@@ -271,7 +269,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
   }
   .mobile-tab.active{color:var(--blue)}
   .mobile-tab svg{width:18px;height:18px;flex-shrink:0}
-  .main{padding:14px 16px;gap:10px}
+  .main{padding:14px 16px;gap:10px;padding-top:108px}
   .url-card{padding:12px 14px}
   .result-card{padding:12px 14px}
   .score-row{gap:10px}
@@ -787,7 +785,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.17.6';
+const CLIENT_VERSION = '1.17.8';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
