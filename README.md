@@ -1,5 +1,11 @@
 # whos-behind-that-client
 
+### v1.17.6 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
+- Mobile: nav bar moved to top (below dark header), same position as desktop — horizontally scrollable
+- Mobile: bottom tab bar hidden — no longer needed
+- Mobile: Investigate icon changed to crosshair/target
+- Mobile: Clusters icon changed to Venn diagram (two overlapping circles)
+
 ### v1.17.5 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
 - Fixed: desktop nav bar (Analyze / Post history / Investigate / Clusters history / FAQ / About) was showing on mobile — now hidden, only the bottom tab bar shows on mobile
 
