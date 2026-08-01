@@ -1,5 +1,13 @@
 # whos-behind-that-client
 
+### v1.17.8 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
+- Mobile: icon tab bar moved to top, just below the dark header — same position as the desktop text nav
+- Mobile: main content padded correctly to sit below both topbar and tab bar
+
+### v1.17.7 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
+- Mobile: text nav bar hidden — bottom tab bar is the sole navigation on mobile
+- Mobile: Investigate icon = crosshair, Clusters icon = Venn diagram 
+
 ### v1.17.6 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
 - Mobile: nav bar moved to top (below dark header), same position as desktop — horizontally scrollable
 - Mobile: bottom tab bar hidden — no longer needed
