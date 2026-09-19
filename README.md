@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.18.0 (client) | Server: v1.25.0 | Admin: v2.20.0
+- Actor card: bot probability badge (color-coded) + reasoning sentence
+- FAQ: "Does WBT detect bots?" entry available once server is updated
+
 ### v1.17.8 — bug fix (client) | Server: v1.22.7 | Admin: v2.17.10
 - Mobile: icon tab bar moved to top, just below the dark header — same position as the desktop text nav
 - Mobile: main content padded correctly to sit below both topbar and tab bar
