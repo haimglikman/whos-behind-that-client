@@ -785,7 +785,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.17.8';
+const CLIENT_VERSION = '1.18.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1373,12 +1373,21 @@ function renderActorCard(container, actor, publication) {
     ? '<div class="actor-handles">' + actor.handles.map(function(h){ return '<span class="actor-handle-tag">' + escHtml(h) + '</span>'; }).join('') + '</div>'
     : '';
   var pubHtml = publication ? renderPublicationCard(publication) : '';
+  var botProb = actor.botProbability;
+  var botUnknown = botProb === 'Unknown' || botProb === null || botProb === undefined;
+  var botPct = botUnknown ? null : parseInt(botProb);
+  var botColor = botPct === null ? 'var(--text3)' : botPct >= 70 ? '#d9534f' : botPct >= 40 ? '#f0ad4e' : '#5cb85c';
+  var botLabel = botPct === null ? 'Unknown' : botPct + '%';
   container.innerHTML =
     '<div style="margin-bottom:6px">' +
-      '<div class="actor-name">' + escHtml(actor.name||actor.handle||'Unknown') + '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<div class="actor-name">' + escHtml(actor.name||actor.handle||'Unknown') + '</div>' +
+        '<div style="display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:99px;padding:3px 10px;font-size:10px;font-weight:700;color:' + botColor + '">🤖 Bot probability: ' + escHtml(botLabel) + '</div>' +
+      '</div>' +
       (actor.location ? '<div class="actor-location">📍 ' + escHtml(actor.location) + '</div>' : '') +
     '</div>' +
     '<div class="actor-bio">' + escHtml(stripCitations(actor.bio||'No biographical information found.')) + '</div>' +
+    (actor.botReasoning ? '<div style="font-size:10px;color:var(--text3);margin-top:6px;font-style:italic;line-height:1.5">' + escHtml(actor.botReasoning) + '</div>' : '') +
     handlesHtml + pubHtml;
 }
 
