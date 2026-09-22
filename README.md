@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.18.1 — bug fix (client) | Server: v1.28.0 | Admin: v2.21.0
+- TikTok added to Source filter; TikTok and YouTube icons in history
+- Fixed: YouTube Source filter never matched — platform detection now covers TikTok and YouTube, and derives platform from URL for older scans
+- Fixed: cluster ID linked to the retired dev site
+
 ### v1.18.0 (client) | Server: v1.25.0 | Admin: v2.20.0
 - Actor card: bot probability badge (color-coded) + reasoning sentence
 - FAQ: "Does WBT detect bots?" entry available once server is updated
