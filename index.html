@@ -494,6 +494,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
               <option value="x">X</option>
               <option value="instagram">Instagram</option>
               <option value="facebook">Facebook</option>
+              <option value="tiktok">TikTok</option>
               <option value="youtube">YouTube</option>
             </select>
           </div>
@@ -785,7 +786,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.18.0';
+const CLIENT_VERSION = '1.18.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -910,13 +911,21 @@ function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function detectPlatform(url) {
   if (/x\.com|twitter\.com/i.test(url)) return 'x';
   if (/instagram\.com/i.test(url)) return 'instagram';
-  if (/facebook\.com|fb\.com/i.test(url)) return 'facebook';
+  if (/facebook\.com|fb\.com|fb\.watch/i.test(url)) return 'facebook';
+  if (/tiktok\.com/i.test(url)) return 'tiktok';
+  if (/youtube\.com|youtu\.be/i.test(url)) return 'youtube';
   try {
     const domain = new URL(url).hostname.replace(/^www\./, '');
     const newsDomains = ['ynet.co.il','ynetnews.com','haaretz.co.il','haaretz.com','israelhayom.co.il','israelhayom.com','inn.co.il','arutzsheva.co.il','mako.co.il','n12.co.il','kan.org.il','walla.co.il','maariv.co.il','timesofisrael.com','jpost.com','jerusalempost.com','972mag.com','calcalist.co.il','globes.co.il','themarker.com','channel14.co.il','i24news.tv','bbc.com','bbc.co.uk','reuters.com','apnews.com','nytimes.com','washingtonpost.com','theguardian.com','aljazeera.com','aljazeera.net','cnn.com','foxnews.com','wsj.com','ft.com','economist.com','middleeasteye.net','almonitor.com','foreignpolicy.com','tabletmag.com','memri.org','le-monde.fr','lemonde.fr','derspiegel.de','spiegel.de','atlanticcouncil.org','independent.co.uk','telegraph.co.uk','nbcnews.com','apnews.com','axios.com','bloomberg.com','newsweek.com','vox.com','politico.com','thehill.com'];
     if (newsDomains.includes(domain)) return 'news';
+    const p = new URL(url).pathname;
+    if (p && p !== '/') return 'news';
   } catch(e) {}
   return 'unknown';
+}
+// Older scans may be stored as 'unknown' — derive from URL
+function effectivePlatform(e) {
+  return (e.platform && e.platform !== 'unknown') ? e.platform : detectPlatform(e.url || '');
 }
 function alignmentColor(pct) {
   if (pct >= 81) return '#e8603c';
@@ -1456,7 +1465,7 @@ async function saveToHistory(url, postText, result, srvVer) {
   if (dd) dd.dataset.built = '';
   // Reset source dropdown so new news domains appear immediately
   const ssel = document.getElementById('cf-platform');
-  if (ssel) { const cur = ssel.value; ssel.innerHTML = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="youtube">YouTube</option>'; if (cur) ssel.value = cur; }
+  if (ssel) { const cur = ssel.value; ssel.innerHTML = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="youtube">YouTube</option>'; if (cur) ssel.value = cur; }
   return entry;
 }
 
@@ -1557,12 +1566,12 @@ function renderHistory() {
     list.innerHTML = '<div class="no-history">No scans yet. Analyze a post to see it here.</div>';
     return;
   }
-  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', news:'📰', unknown:'🔗'};
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', news:'📰', unknown:'🔗'};
   list.innerHTML = h.map(function(e) {
     const d = new Date(e.ts);
     const dateStr = d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     const scanId = e.scanId || ('WBT-legacy-' + e.id);
-    const icon = platformIcon[e.platform||'unknown']||'🔗';
+    const icon = platformIcon[effectivePlatform(e)]||'🔗';
     if (e.failed) {
       return '<div class="history-item" style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.03)">' +
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">' +
@@ -1643,11 +1652,11 @@ function applyClientFilters() {
     const curVal = ssel.value;
     const newsDomains = {};
     h.forEach(function(e) {
-      if (e.platform === 'news' && e.url) {
+      if (effectivePlatform(e) === 'news' && e.url) {
         try { const d = new URL(e.url).hostname.replace(/^www\./,''); newsDomains[d] = getDomainDisplayName(e.url); } catch(err) {}
       }
     });
-    const staticOpts = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="youtube">YouTube</option>';
+    const staticOpts = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="youtube">YouTube</option>';
     const newsOpts = Object.keys(newsDomains).sort().map(function(d){ return '<option value="news:'+d+'">'+escHtml(newsDomains[d])+'</option>'; }).join('');
     ssel.innerHTML = staticOpts + (newsOpts ? '<optgroup label="News sites">' + newsOpts + '</optgroup>' : '');
     if (curVal) ssel.value = curVal;
@@ -1676,7 +1685,7 @@ function applyClientFilters() {
         const domain = source.slice(5);
         try { const d = new URL(e.url||'').hostname.replace(/^www\./,''); if (d !== domain) return false; } catch(err) { return false; }
       } else {
-        if ((e.platform||'unknown') !== source) return false;
+        if (effectivePlatform(e) !== source) return false;
       }
     }
     if (dateFrom && new Date(e.ts) < new Date(dateFrom)) return false;
@@ -1737,13 +1746,13 @@ function clearClientFilters() {
 function renderClientHistoryList(entries) {
   const list = document.getElementById('history-list');
   if (!entries || entries.length === 0) { list.innerHTML = '<div class="no-history">No scans match your filters.</div>'; return; }
-  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', news:'📰', unknown:'🔗'};
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', news:'📰', unknown:'🔗'};
   const h = getHistory();
   list.innerHTML = entries.map(function(e) {
     const d = new Date(e.ts);
     const dateStr = d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
     const scanId = e.scanId || ('WBT-legacy-' + e.id);
-    const icon = platformIcon[e.platform||'unknown']||'🔗';
+    const icon = platformIcon[effectivePlatform(e)]||'🔗';
     if (e.failed) {
       return '<div class="history-item" style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.03)">' +
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span>' + icon + '</span><span class="scan-id">' + escHtml(scanId) + '</span><span style="font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-left:4px">Failed</span></div>' +
@@ -2079,7 +2088,7 @@ function openClientClusterFromHistory(idx) {
 
   // Cluster ID at top
   html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">';
-  html += '<a href="' + escHtml('https://haimglikman.github.io/whos-behind-that-client-dev/' + c.id) + '" style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(26,107,255,.2);border-radius:6px;padding:4px 12px;text-decoration:none">' + escHtml(c.id) + '</a>';
+  html += '<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-dim);border:1px solid rgba(26,107,255,.2);border-radius:6px;padding:4px 12px;text-decoration:none">' + escHtml(c.id) + '</span>';
   const cDate = c.ts ? new Date(c.ts).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
   if (cDate) html += '<span style="font-size:10px;color:var(--text3)">' + cDate + '</span>';
   html += '</div>';
