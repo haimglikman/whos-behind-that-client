@@ -786,7 +786,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.18.1';
+const CLIENT_VERSION = '1.19.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1153,9 +1153,19 @@ function buildResult(analysis, post, entities) {
       secondary: m.alignment==='secondary'
     });
   }).sort(function(a,b){return b.pct-a.pct;});
-  const above = rawMatches.filter(function(m){return m.pct>=85;});
-  const primary = above.filter(function(m){return !m.secondary;}).slice(0,3);
-  const secondary = above.filter(function(m){return m.secondary;}).slice(0,2);
+  // Server 2.x (response has 'triage'): the judge's verdict decides — primary ≥60%, secondary ≥50%.
+  // Server 1.x: legacy 85% threshold.
+  const isV2 = !!(analysis && analysis.triage !== undefined);
+  let primary, secondary;
+  if (isV2) {
+    primary = rawMatches.filter(function(m){return m.alignment==='primary' && m.pct>=60;}).slice(0,3);
+    secondary = rawMatches.filter(function(m){return m.alignment==='secondary' && m.pct>=50;}).slice(0,2);
+  } else {
+    const above = rawMatches.filter(function(m){return m.pct>=85;});
+    primary = above.filter(function(m){return !m.secondary;}).slice(0,3);
+    secondary = above.filter(function(m){return m.secondary;}).slice(0,2);
+  }
+  const ruleText = isV2 ? "by the judge's verdict" : 'above 85%';
   const matches = primary.concat(secondary);
   const topPrimary = primary[0]||null;
   const topMatch = topPrimary ? topPrimary.pct : 0;
@@ -1170,9 +1180,10 @@ function buildResult(analysis, post, entities) {
       score: topMatch,
       label: topNames||'No strong alignment detected',
       desc: matches.length>0
-        ? 'Claude AI found '+primary.length+' primary and '+secondary.length+' secondary alignment'+(secondary.length!==1?'s':'')+' above 85% across '+entities.length+' entities. Strongest: '+(topName||'—')+' at '+topMatch+'%.'
-        : 'Claude AI found no entity alignment above 85% across '+entities.length+' entities.'
-    }
+        ? 'Claude AI found '+primary.length+' primary and '+secondary.length+' secondary alignment'+(secondary.length!==1?'s':'')+' '+ruleText+' across '+entities.length+' entities. Strongest: '+(topName||'—')+' at '+topMatch+'%.'
+        : 'Claude AI found no entity alignment '+ruleText+' across '+entities.length+' entities.'
+    },
+    noAlignmentText: isV2 ? 'No meaningful entity alignment detected.' : 'No entity alignment above 85% detected.'
   };
 }
 
@@ -1252,7 +1263,7 @@ function showResults(url, d) {
   }
 
   if (primary.length===0 && secondary.length===0) {
-    primaryEl.innerHTML = '<div class="no-alignment">No entity alignment above 85% detected.</div>';
+    primaryEl.innerHTML = '<div class="no-alignment">' + escHtml(d.noAlignmentText || 'No entity alignment above 85% detected.') + '</div>';
     secondaryEl.innerHTML = '';
   } else {
     primaryEl.innerHTML = primary.length>0
