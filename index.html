@@ -495,6 +495,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
               <option value="instagram">Instagram</option>
               <option value="facebook">Facebook</option>
               <option value="tiktok">TikTok</option>
+              <option value="telegram">Telegram</option>
               <option value="youtube">YouTube</option>
             </select>
           </div>
@@ -786,7 +787,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.19.1';
+const CLIENT_VERSION = '1.20.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -913,6 +914,7 @@ function detectPlatform(url) {
   if (/instagram\.com/i.test(url)) return 'instagram';
   if (/facebook\.com|fb\.com|fb\.watch/i.test(url)) return 'facebook';
   if (/tiktok\.com/i.test(url)) return 'tiktok';
+  if (/(^|\/\/|\.)(t|telegram)\.me\//i.test(url)) return 'telegram';
   if (/youtube\.com|youtu\.be/i.test(url)) return 'youtube';
   try {
     const domain = new URL(url).hostname.replace(/^www\./, '');
@@ -1487,7 +1489,7 @@ async function saveToHistory(url, postText, result, srvVer, meta) {
   if (dd) dd.dataset.built = '';
   // Reset source dropdown so new news domains appear immediately
   const ssel = document.getElementById('cf-platform');
-  if (ssel) { const cur = ssel.value; ssel.innerHTML = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="youtube">YouTube</option>'; if (cur) ssel.value = cur; }
+  if (ssel) { const cur = ssel.value; ssel.innerHTML = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="telegram">Telegram</option><option value="youtube">YouTube</option>'; if (cur) ssel.value = cur; }
   return entry;
 }
 
@@ -1588,7 +1590,7 @@ function renderHistory() {
     list.innerHTML = '<div class="no-history">No scans yet. Analyze a post to see it here.</div>';
     return;
   }
-  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', news:'📰', unknown:'🔗'};
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', telegram:'✈', news:'📰', unknown:'🔗'};
   list.innerHTML = h.map(function(e) {
     const d = new Date(e.ts);
     const dateStr = d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -1678,7 +1680,7 @@ function applyClientFilters() {
         try { const d = new URL(e.url).hostname.replace(/^www\./,''); newsDomains[d] = getDomainDisplayName(e.url); } catch(err) {}
       }
     });
-    const staticOpts = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="youtube">YouTube</option>';
+    const staticOpts = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="telegram">Telegram</option><option value="youtube">YouTube</option>';
     const newsOpts = Object.keys(newsDomains).sort().map(function(d){ return '<option value="news:'+d+'">'+escHtml(newsDomains[d])+'</option>'; }).join('');
     ssel.innerHTML = staticOpts + (newsOpts ? '<optgroup label="News sites">' + newsOpts + '</optgroup>' : '');
     if (curVal) ssel.value = curVal;
@@ -1768,7 +1770,7 @@ function clearClientFilters() {
 function renderClientHistoryList(entries) {
   const list = document.getElementById('history-list');
   if (!entries || entries.length === 0) { list.innerHTML = '<div class="no-history">No scans match your filters.</div>'; return; }
-  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', news:'📰', unknown:'🔗'};
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', telegram:'✈', news:'📰', unknown:'🔗'};
   const h = getHistory();
   list.innerHTML = entries.map(function(e) {
     const d = new Date(e.ts);
