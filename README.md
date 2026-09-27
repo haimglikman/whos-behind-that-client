@@ -1,5 +1,8 @@
 # whos-behind-that-client
 
+### v1.20.0 (client) | Server: v2.1.0 | Admin: v2.25.0
+- Telegram: platform detection, Source filter and history icon
+
 ### v1.19.1 — bug fix (client) | Server: v2.0.5 | Admin: v2.24.1
 - Fixed: client scans were saved without token data, so the admin showed no usage for them — the client now sends Claude tokens, Jev tokens and the models used with every scan
 - Applies to new scans only; earlier client scans have no recorded token data
