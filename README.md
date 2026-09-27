@@ -1,5 +1,9 @@
 # whos-behind-that-client
 
+### v1.19.1 — bug fix (client) | Server: v2.0.5 | Admin: v2.24.1
+- Fixed: client scans were saved without token data, so the admin showed no usage for them — the client now sends Claude tokens, Jev tokens and the models used with every scan
+- Applies to new scans only; earlier client scans have no recorded token data
+
 ### v1.19.0 (client) | Server: v2.0.5 | Admin: v2.24.1
 - Verdict-based display for the v2 engine: results from server 2.x are shown by the judge's verdict — primary from 60% (up to 3), secondary from 50% (up to 2) — instead of a fixed 85% cut-off
 - Results from server 1.x keep the 85% rule
