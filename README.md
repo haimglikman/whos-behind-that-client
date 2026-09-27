@@ -1,5 +1,10 @@
 # whos-behind-that-client
 
+### v1.19.0 (client) | Server: v2.0.5 | Admin: v2.24.1
+- Verdict-based display for the v2 engine: results from server 2.x are shown by the judge's verdict — primary from 60% (up to 3), secondary from 50% (up to 2) — instead of a fixed 85% cut-off
+- Results from server 1.x keep the 85% rule
+- Updated summary and "no alignment" messages to match the active rule
+
 ### v1.18.1 — bug fix (client) | Server: v1.28.0 | Admin: v2.21.0
 - TikTok added to Source filter; TikTok and YouTube icons in history
 - Fixed: YouTube Source filter never matched — platform detection now covers TikTok and YouTube, and derives platform from URL for older scans
