@@ -786,7 +786,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.19.0';
+const CLIENT_VERSION = '1.19.1';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1105,7 +1105,11 @@ async function analyzeWithManualText() {
     const analysis = await res.json();
     adv(3); await delay(300); adv(4); await delay(300); adv(5); await delay(200);
     const result = buildResult(analysis, {text: postText}, entities);
-    const entry = await saveToHistory(url, postText, result, null);
+    const at = analysis._tokens || {};
+    const entry = await saveToHistory(url, postText, result, null, {
+      inputTokens: at.input, outputTokens: at.output,
+      jevTokens: (analysis.triage && analysis.triage.tokens) || 0, models: analysis.models || null
+    });
     incrementScanCount();
     finishAnalysis(entry);
   } catch(e) {
@@ -1141,7 +1145,10 @@ async function performServerAnalysis(url) {
   const finalUrl = data.url || url;
   const result = buildResult(data.analysis, data.post, entities);
   if (data.post && data.post.videoNote) result.videoNote = data.post.videoNote;
-  const entry = await saveToHistory(finalUrl, (data.post&&data.post.text)||'', result, null).catch(function(e){ console.warn('History save error:', e.message); });
+  const entry = await saveToHistory(finalUrl, (data.post&&data.post.text)||'', result, null, {
+    inputTokens: data.inputTokens, outputTokens: data.outputTokens,
+    jevTokens: data.jevTokens || 0, models: data.models || (data.analysis && data.analysis.models) || null
+  }).catch(function(e){ console.warn('History save error:', e.message); });
   incrementScanCount();
   finishAnalysis(entry);
 }
@@ -1437,7 +1444,7 @@ async function fetchSrvVersion() {
   } catch(e) { return '?'; }
 }
 
-async function saveToHistory(url, postText, result, srvVer) {
+async function saveToHistory(url, postText, result, srvVer, meta) {
   const sv = srvVer || await fetchSrvVersion().catch(function(){ return '?'; });
   const scanId = generateScanId(sv);
   const platform = detectPlatform(url);
@@ -1456,7 +1463,11 @@ async function saveToHistory(url, postText, result, srvVer) {
     appVersion: CLIENT_VERSION,
     serverVersion: sv,
     comment: '',
-    fullResult: result
+    fullResult: result,
+    inputTokens: (meta && meta.inputTokens) || 0,
+    outputTokens: (meta && meta.outputTokens) || 0,
+    jevTokens: (meta && meta.jevTokens) || 0,
+    models: (meta && meta.models) || null
   };
   const h = getHistory().filter(function(e){
     const tsMin = e.ts ? e.ts.slice(0,16) : '';
