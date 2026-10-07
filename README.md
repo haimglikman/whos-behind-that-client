@@ -1,8 +1,5 @@
 # whos-behind-that-client
 
-### v1.22.0 (client) | Server: v2.5.0 | Admin: v2.28.0
-- Comment alignment for news sites and Telegram, in addition to YouTube and TikTok; unsupported comment systems are named on the card
-
 ### v1.20.0 (client) | Server: v2.1.0 | Admin: v2.25.0
 - Telegram: platform detection, Source filter and history icon
 
