@@ -380,8 +380,26 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
           <span id="error-text"></span>
         </div>
         <div class="url-row">
-          <input type="text" class="url-input" id="url-input" placeholder="https://x.com/username/status/..." oninput="onUrlChange()" />
+          <input type="text" class="url-input" id="url-input" placeholder="https://x.com/username/status/..." oninput="onUrlChange()" onpaste="onUrlPaste(event)" />
           <button class="btn-primary" id="analyze-btn" onclick="startAnalysis()">Analyze</button>
+        </div>
+        <button onclick="document.getElementById('shot-input').click()" id="shot-toggle" style="background:none;border:none;font-size:12px;color:var(--text3);cursor:pointer;padding:0;margin-top:8px;font-family:var(--sans);text-align:left">
+          🖼 Facebook or Instagram post that won't load? <span style="color:var(--blue);font-weight:600;white-space:nowrap">Upload a screenshot</span>
+        </button>
+        <input type="file" id="shot-input" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none" onchange="onShotPicked(this.files && this.files[0]); this.value=''" />
+        <div id="shot-box" style="display:none;margin-top:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm)">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <img id="shot-preview" alt="Screenshot preview" style="width:72px;max-height:120px;object-fit:cover;object-position:top;border-radius:6px;border:1px solid var(--border);flex-shrink:0" />
+            <div style="flex:1;min-width:0">
+              <div id="shot-name" style="font-size:12px;font-weight:600;color:var(--text);word-break:break-all"></div>
+              <div id="shot-meta" style="font-size:11px;color:var(--text3);margin:3px 0 6px"></div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:8px">We read the post text, the account name and what the image shows. Your screenshot is not stored.</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn-primary btn-sm" id="shot-analyze-btn" onclick="analyzeScreenshot()">Analyze screenshot</button>
+                <button class="btn-sm" onclick="clearShot()" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);cursor:pointer;font-family:var(--sans)">Remove</button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="manual-fallback" id="manual-fallback">
           <div class="fallback-hint" id="fallback-hint">Could not fetch the post automatically. <em>Who's Behind That?</em> can only access public posts — if this post is public, try again in a moment. You can also paste the post text below for analysis:</div>
@@ -497,6 +515,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
               <option value="tiktok">TikTok</option>
               <option value="telegram">Telegram</option>
               <option value="youtube">YouTube</option>
+              <option value="screenshot">Screenshot</option>
             </select>
           </div>
           <div style="flex:0 0 130px"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Date from</div><input type="date" class="url-input" style="height:32px;font-size:11px" id="cf-date-from" onchange="applyClientFilters()"/></div>
@@ -579,7 +598,7 @@ body{background:var(--bg);display:flex;flex-direction:column;min-height:100vh}
         <h2>What can be analyzed</h2>
         <div class="disclaimer-box">
           <p><strong>Supported sources:</strong> Posts from X (Twitter), Facebook, and Instagram, as well as articles from major news and media websites (Ynet, Haaretz, BBC, New York Times, Al Jazeera, and many others).</p>
-          <p style="margin-top:8px"><strong>Public content only:</strong> <em>Who's Behind That?</em> can only access publicly available content. This means public social media posts — not friends-only posts, closed groups, or private accounts. For news articles, only freely accessible pages are supported — paywalled articles cannot be fetched automatically, but you can paste the text manually for analysis.</p>
+          <p style="margin-top:8px"><strong>Public content only:</strong> <em>Who's Behind That?</em> can only access publicly available content. This means public social media posts — not friends-only posts, closed groups, or private accounts. For news articles, only freely accessible pages are supported — paywalled articles cannot be fetched automatically, but you can paste the text manually for analysis. If a Facebook or Instagram post can't be read, you can upload a screenshot of it instead; the screenshot is read once and not stored.</p>
         </div>
       </div>
 
@@ -787,7 +806,7 @@ const ENTITY_RELATIONS = {
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const CLIENT_VERSION = '1.20.0';
+const CLIENT_VERSION = '1.23.0';
 const SERVER_URL = 'https://whos-behind-that-server.onrender.com';
 const DAILY_LIMIT = 10;
 const CONTACT_EMAIL = 'contact@whosbehindthat.com'; // replace with real email
@@ -1060,6 +1079,7 @@ function resetAnalysis() {
   document.getElementById('actor-result-card').style.display = 'none';
   document.getElementById('account-info').style.display = 'block';
   document.getElementById('convergent-card').style.display = 'none';
+  clearShot();
 }
 
 function showLoader() {
@@ -1130,6 +1150,114 @@ function finishAnalysis(entry) {
   }
   const scanId = entry ? entry.scanId : '';
   toastLong('Analysis complete — saved to Post history' + (scanId ? ' · ' + scanId : ''));
+}
+
+// ─────────────────────────────────────────────
+// SCREENSHOT ANALYSIS (1.23.0) — for posts the server can't read (Facebook, Instagram, WhatsApp, memes)
+// The image is downscaled here to fit the server's upload limit. Counts as one scan.
+// ─────────────────────────────────────────────
+const SHOT_MAX_B64 = 1700000;
+const SHOT_MAX_SIDE = 2000;
+let currentShot = null;
+
+function onUrlPaste(ev) {
+  const items = (ev.clipboardData && ev.clipboardData.items) || [];
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].kind === 'file' && /^image\//.test(items[i].type)) { ev.preventDefault(); onShotPicked(items[i].getAsFile()); return; }
+  }
+}
+
+function loadImageFile(file) {
+  return new Promise(function(resolve, reject) {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = function() { resolve({ img: img, url: url }); };
+    img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('This file could not be opened as an image.')); };
+    img.src = url;
+  });
+}
+
+async function prepareShot(file) {
+  const loaded = await loadImageFile(file);
+  const img = loaded.img;
+  try {
+    const raw = await new Promise(function(res){ const r = new FileReader(); r.onload = function(){ res(String(r.result)); }; r.readAsDataURL(file); });
+    const rawB64 = raw.split(',')[1] || '';
+    const okType = ['image/png','image/jpeg','image/webp','image/gif'].indexOf(file.type) >= 0;
+    const longSide = Math.max(img.naturalWidth, img.naturalHeight);
+    if (okType && rawB64.length <= SHOT_MAX_B64 && longSide <= SHOT_MAX_SIDE) {
+      return { mediaType: file.type, base64: rawB64, width: img.naturalWidth, height: img.naturalHeight };
+    }
+    let scale = Math.min(1, SHOT_MAX_SIDE / longSide), quality = 0.88;
+    for (let i = 0; i < 8; i++) {
+      const w = Math.max(1, Math.round(img.naturalWidth * scale)), h = Math.max(1, Math.round(img.naturalHeight * scale));
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h); cx.drawImage(img, 0, 0, w, h);
+      const b64 = c.toDataURL('image/jpeg', quality).split(',')[1] || '';
+      if (b64.length <= SHOT_MAX_B64) return { mediaType: 'image/jpeg', base64: b64, width: w, height: h };
+      if (quality > 0.7) quality -= 0.08; else scale *= 0.8;
+    }
+    throw new Error('This image is too large even after resizing. Crop it to the post and try again.');
+  } finally { URL.revokeObjectURL(loaded.url); }
+}
+
+async function onShotPicked(file) {
+  if (!file) return;
+  if (!/^image\//.test(file.type)) { toast('Please choose an image (PNG, JPEG, WebP or GIF).'); return; }
+  hideError();
+  try {
+    const prepared = await prepareShot(file);
+    currentShot = Object.assign({ name: file.name || 'Pasted image' }, prepared);
+    document.getElementById('shot-preview').src = 'data:' + prepared.mediaType + ';base64,' + prepared.base64;
+    document.getElementById('shot-name').textContent = currentShot.name;
+    const kb = function(n){ return n >= 1048576 ? (n/1048576).toFixed(1) + ' MB' : Math.round(n/1024) + ' KB'; };
+    document.getElementById('shot-meta').textContent = prepared.width + '×' + prepared.height + ' · ' + kb(Math.round(prepared.base64.length * 3 / 4));
+    document.getElementById('shot-box').style.display = 'block';
+  } catch (e) {
+    clearShot();
+    showError(e.message);
+  }
+}
+
+function clearShot() {
+  currentShot = null;
+  const box = document.getElementById('shot-box'); if (box) box.style.display = 'none';
+  const pv = document.getElementById('shot-preview'); if (pv) pv.removeAttribute('src');
+}
+
+async function analyzeScreenshot() {
+  if (!currentShot) { toast('Choose a screenshot first.'); return; }
+  if (isRateLimited()) { showRateLimitMessage(); return; }
+  const refUrl = document.getElementById('url-input').value.trim();
+  const url = /^https?:\/\//i.test(refUrl) ? refUrl : '';
+  const shotName = currentShot.name;
+  hideError();
+  showLoader();
+  const steps = document.getElementById('loader-steps').querySelectorAll('.loader-step');
+  if (steps[0]) steps[0].textContent = 'Reading the screenshot...';
+  const adv = function(i){ if(steps[i]){steps[i].classList.remove('active');steps[i].classList.add('done');steps[i].textContent='✓ '+(i===0?'Reading the screenshot...':LOAD_STEPS[i]);} if(steps[i+1])steps[i+1].classList.add('active'); };
+  try {
+    const entities = getEntities();
+    const res = await fetch(SERVER_URL + '/analyze-image', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: currentShot.base64, mediaType: currentShot.mediaType, entities, deviceId: getDeviceId() })
+    });
+    if (!res.ok) { const e = await res.json().catch(function(){return {};}); throw new Error(e.error || 'Server error ' + res.status); }
+    adv(0); await delay(200); adv(1); await delay(200); adv(2); await delay(200); adv(3); await delay(200); adv(4); await delay(200); adv(5); await delay(150);
+    const data = await res.json();
+    const result = buildResult(data.analysis, data.post, entities);
+    const entry = await saveToHistory(url, (data.post&&data.post.text)||'', result, null, {
+      inputTokens: data.inputTokens, outputTokens: data.outputTokens,
+      jevTokens: data.jevTokens || 0, models: data.models || null, fromImage: true
+    }).catch(function(e){ console.warn('History save error:', e.message); });
+    incrementScanCount();
+    clearShot();
+    finishAnalysis(entry);
+    if (!url) { const ru = document.getElementById('result-url'); if (ru) ru.textContent = '🖼 Screenshot: ' + shotName; }
+  } catch(e) {
+    document.getElementById('loader').classList.remove('active');
+    showError(e.message);
+  }
 }
 
 async function performServerAnalysis(url) {
@@ -1449,7 +1577,8 @@ async function fetchSrvVersion() {
 async function saveToHistory(url, postText, result, srvVer, meta) {
   const sv = srvVer || await fetchSrvVersion().catch(function(){ return '?'; });
   const scanId = generateScanId(sv);
-  const platform = detectPlatform(url);
+  const fromImage = !!(meta && meta.fromImage);
+  const platform = (fromImage && !url) ? 'screenshot' : detectPlatform(url);
   const now = new Date();
   const entry = {
     id: now.getTime(),
@@ -1469,11 +1598,12 @@ async function saveToHistory(url, postText, result, srvVer, meta) {
     inputTokens: (meta && meta.inputTokens) || 0,
     outputTokens: (meta && meta.outputTokens) || 0,
     jevTokens: (meta && meta.jevTokens) || 0,
-    models: (meta && meta.models) || null
+    models: (meta && meta.models) || null,
+    fromImage: fromImage || undefined
   };
   const h = getHistory().filter(function(e){
     const tsMin = e.ts ? e.ts.slice(0,16) : '';
-    return e.scanId !== scanId && !(e.url === url && tsMin === now.toISOString().slice(0,16));
+    return e.scanId !== scanId && !(url && e.url === url && tsMin === now.toISOString().slice(0,16));
   });
   h.unshift(entry);
   if (h.length > 200) h.splice(200);
@@ -1489,7 +1619,7 @@ async function saveToHistory(url, postText, result, srvVer, meta) {
   if (dd) dd.dataset.built = '';
   // Reset source dropdown so new news domains appear immediately
   const ssel = document.getElementById('cf-platform');
-  if (ssel) { const cur = ssel.value; ssel.innerHTML = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="telegram">Telegram</option><option value="youtube">YouTube</option>'; if (cur) ssel.value = cur; }
+  if (ssel) { const cur = ssel.value; ssel.innerHTML = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="telegram">Telegram</option><option value="youtube">YouTube</option><option value="screenshot">Screenshot</option>'; if (cur) ssel.value = cur; }
   return entry;
 }
 
@@ -1590,7 +1720,7 @@ function renderHistory() {
     list.innerHTML = '<div class="no-history">No scans yet. Analyze a post to see it here.</div>';
     return;
   }
-  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', telegram:'✈', news:'📰', unknown:'🔗'};
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', telegram:'✈', news:'📰', screenshot:'🖼', unknown:'🔗'};
   list.innerHTML = h.map(function(e) {
     const d = new Date(e.ts);
     const dateStr = d.toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
@@ -1680,7 +1810,7 @@ function applyClientFilters() {
         try { const d = new URL(e.url).hostname.replace(/^www\./,''); newsDomains[d] = getDomainDisplayName(e.url); } catch(err) {}
       }
     });
-    const staticOpts = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="telegram">Telegram</option><option value="youtube">YouTube</option>';
+    const staticOpts = '<option value="">All</option><option value="x">X</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="telegram">Telegram</option><option value="youtube">YouTube</option><option value="screenshot">Screenshot</option>';
     const newsOpts = Object.keys(newsDomains).sort().map(function(d){ return '<option value="news:'+d+'">'+escHtml(newsDomains[d])+'</option>'; }).join('');
     ssel.innerHTML = staticOpts + (newsOpts ? '<optgroup label="News sites">' + newsOpts + '</optgroup>' : '');
     if (curVal) ssel.value = curVal;
@@ -1770,7 +1900,7 @@ function clearClientFilters() {
 function renderClientHistoryList(entries) {
   const list = document.getElementById('history-list');
   if (!entries || entries.length === 0) { list.innerHTML = '<div class="no-history">No scans match your filters.</div>'; return; }
-  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', telegram:'✈', news:'📰', unknown:'🔗'};
+  const platformIcon = {x:'𝕏', instagram:'📷', facebook:'f', tiktok:'♪', youtube:'▶', telegram:'✈', news:'📰', screenshot:'🖼', unknown:'🔗'};
   const h = getHistory();
   list.innerHTML = entries.map(function(e) {
     const d = new Date(e.ts);
