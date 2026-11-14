@@ -1,5 +1,14 @@
 # whos-behind-that-client
 
+### v1.23.0 (client) | Server: v2.10.0 | Admin: v2.32.0 | Chatbot: v1.2.3.1
+Built from v1.20.0 (v1.21.x–v1.22.x were dev-only).
+- Screenshot upload: "Upload a screenshot" under the URL box, or paste an image into the URL box, for Facebook and Instagram posts that won't load; counts as one scan
+- Images are downscaled in the browser; the screenshot is not stored
+- History: screenshot scans get their own source (🖼 Screenshot) and Source filter option
+- About: mentions the screenshot option for posts that can't be read
+
+### v1.21.0 (client) and v1.21.0 (client) DEV
+
 ### v1.20.0 (client) | Server: v2.1.0 | Admin: v2.25.0
 - Telegram: platform detection, Source filter and history icon
 
